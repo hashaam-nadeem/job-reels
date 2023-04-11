@@ -37,6 +37,23 @@ dependencies:
   get: ^4.6.5
   connectivity_plus: ^2.3.7
   shared_preferences: ^2.0.15
+  dio: ^4.0.6
+  loading_animation_widget: ^1.2.0+3
+  timelines: ^0.1.0
+  flutter_neumorphic: ^3.2.0
+  syncfusion_flutter_core:
+  intl:
+  scrollable_positioned_list:
+  focused_menu: ^1.0.5
+  flutter_switch: ^0.3.2
+  table_calendar: ^3.0.8
+  shimmer: ^2.0.0
+  downloads_path_provider_28: ^0.1.2
+  file_icon: ^1.0.0
+  painter: ^2.0.0
+  screenshot: ^1.3.0
+  image_gallery_saver: ^1.7.1
+  path_provider: ^2.0.13
 
 dev_dependencies:
   flutter_test:

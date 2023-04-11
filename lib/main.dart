@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:workerapp/Utils/app_constants.dart';
+import 'controller/auth_controller.dart';
 import 'helper/route_helper.dart';
 import 'helper/get_di.dart' as di;
 
@@ -13,7 +14,7 @@ void main() async{
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  // This widgets is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       navigatorKey: Get.key,
       // theme: ,
-      initialRoute: RouteHelper.getLogInRoute(),
+      initialRoute:Get.find<AuthController>().getLoginUserData() != null?(Get.find<AuthController>().authRepo.getLoginUserData()!.name!=""?RouteHelper.getMainScreenRoute():RouteHelper.getUpdateProfile()): RouteHelper.getLogInRoute(),
       getPages: RouteHelper.routes,
       defaultTransition: Transition.zoom,
       transitionDuration: const Duration(milliseconds: 300),
