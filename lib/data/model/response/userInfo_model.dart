@@ -1,13 +1,22 @@
+import 'document_model.dart';
+
 class UserInfoModel {
   String name;
   String email;
   String password;
+  String profilePic;
   String type;
   String phone;
   String address;
   String tokenType;
   String expireAt;
   String accessToken;
+  int totalShift;
+  int cancelledShift;
+  int documentExpiring;
+  String expiryMessage;
+  String nextShiftMessage;
+  List<DocumentModel> documents;
   bool isVerified;
   int expireIn;
 
@@ -23,7 +32,14 @@ class UserInfoModel {
         required this.expireIn,
         required this.address,
         required this.phone,
+        required this.profilePic,
         required this.password,
+        required this.totalShift,
+        required this.cancelledShift,
+        required this.expiryMessage,
+        required this.documents,
+        required this.documentExpiring,
+        required this.nextShiftMessage,
       });
 //
   factory UserInfoModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +54,13 @@ class UserInfoModel {
       phone : json['phone']??"",
       address : json['address']??"",
       password : json['password']??"",
+      totalShift : json['total_shift']??0,
+      cancelledShift : json['cancelled_shift']??0,
+      documentExpiring : json['document_expiring']??0,
+      expiryMessage : json['expiry_message']??"",
+      nextShiftMessage : json['next_shift_message']??"",
+      profilePic : json['profile']??"",
+      documents : json['documents']!=null?List<DocumentModel>.from(json['documents'].map((model)=> DocumentModel.fromJson(model))):[],
       expireIn : json['expires_in']?? 0,
 
     );
@@ -54,6 +77,11 @@ class UserInfoModel {
     data['phone'] = phone;
     data['address'] = address;
     data['password'] = password;
+    data['total_shift'] = totalShift;
+    data['cancelled_shift'] = cancelledShift;
+    data['document_expiring'] = documentExpiring;
+    data['expiry_message'] = expiryMessage;
+    data['profile'] = profilePic;
     data['email_verified_at'] = isVerified?"05-10-2022":null;
     return data;
   }

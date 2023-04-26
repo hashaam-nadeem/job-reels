@@ -6,6 +6,7 @@ import 'break_detail_model.dart';
 class ShiftModel {
   String code;
   String name;
+  int clientId;
   String address;
   String startTime;
   String endTime;
@@ -30,6 +31,7 @@ class ShiftModel {
       {
         required this.code,
         required this.name,
+        required this.clientId,
         required this.startTime,
         required this.endTime,
         required this.startDate,
@@ -55,6 +57,7 @@ class ShiftModel {
     return ShiftModel(
       code : json['code'],
       name : json['name'],
+      clientId : json['client_id'],
       startTime : json['start_time'],
       endTime : json['end_time']??"",
       startDate : json['start_date']??"",
@@ -78,6 +81,7 @@ class ShiftModel {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['code'] = code;
     data['name'] = name;
+    data['client_id'] = clientId;
     data['start_time'] = startTime;
     data['end_time'] = endTime;
     data['start_date'] = startDate;

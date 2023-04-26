@@ -422,7 +422,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          ' Odometer Start',
+                                          'OdometerStart',
                                           style: montserratRegular.copyWith(
                                             color: const Color(0xFF6B7094),
                                             fontSize: 10,
@@ -480,7 +480,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                                       crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Text(
-                                          ' Odometer End',
+                                          'OdometerEnd',
                                           style: montserratRegular.copyWith(
                                             color: const Color(0xFF6B7094),
                                             fontSize: 10,
@@ -606,6 +606,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                           _takeScreenshot();
                           Future.delayed(const Duration(milliseconds: 500),(){
                             updateShiftStatus(shiftController,shiftModel!);
+                            shiftController.clockOut(code: shiftModel!.code);
                           });
                         },
                         icon: Image.asset(Images.forwardIcon,width: 30, height: 25,),

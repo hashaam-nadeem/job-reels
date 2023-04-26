@@ -11,7 +11,6 @@ class AppConstant{
   /// Api section
 
   static const String BASE_URL = 'http://erp.deurali.biz/api/v1';
-  static const String SOLAR_EDGE_BASE_URL = 'https://monitoringapi.solaredge.com/';
   static const String LOGIN = '/login';
   static const String LOGOUT = '/logout';
   static const String UPDATE_PROFILE = '/update-profile';
@@ -24,6 +23,10 @@ class AppConstant{
   static const String FETCH_DOCUMENT = '/document';
   static const String UPDATE_STATUS = '/update-shift-status';
   static const String CLIENT_DETAILS = '/client-detail/';
+  static const String AVAILABILITY = '/set-availability';
+  static const String FETCH_AVAILABILITY = '/availability';
+  static const String CLOCK_IN = '/clock-in';
+  static const String CLOCK_OUT = '/clock-out';
 
 
 

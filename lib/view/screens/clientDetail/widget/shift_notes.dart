@@ -5,12 +5,14 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:workerapp/utils/app_images.dart';
 import 'dart:math' as math;
+import '../../../../controller/bottom_bar_controller.dart';
 import '../../../../controller/client_controller.dart';
 import '../../../../utils/app_strings.dart';
 import '../../../../utils/styles.dart';
 
 class ShiftNotes extends StatefulWidget {
-   const ShiftNotes({Key? key}) : super(key: key);
+  final int? clientId;
+   const ShiftNotes({Key? key, this.clientId}) : super(key: key);
 
   @override
   State<ShiftNotes> createState() => _ShiftNotesState();
@@ -21,7 +23,7 @@ class _ShiftNotesState extends State<ShiftNotes> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-     await Get.find<ClientController>().fetchNotes();
+     await Get.find<ClientController>().fetchNotes(clientId:widget.clientId??0,page: 1 );
       isExpandedStateList = List<bool>.generate(Get.find<ClientController>().notesList.length, (int index) => false);
     });
 

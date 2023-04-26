@@ -491,12 +491,16 @@ class API_STRUCTURE {
       return {API_RESPONSE.SUCCESS: response.data};
     } else {
       String error='';
-      // print("resultttttttttttttt...................${response.data["data"]}");
+      print("resultttttttttttttt...................${response.data['error']['message']}");
+      try{
+        error = response.data['error']['message'];
+      }catch(e){
+        error = API_RESPONSE.GetErrorResponse(response.statusCode!) ?? "Unknown Status Response";
+      }
       showCustomSnackBar(
-        response.data["error"]['message'],
+        error,
         isError: true,
       );
-      error = API_RESPONSE.GetErrorResponse(response.statusCode!) ?? "Unknown Status Response";
       return {API_RESPONSE.ERROR: error};
     }
   }

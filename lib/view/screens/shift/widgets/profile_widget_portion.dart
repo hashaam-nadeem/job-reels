@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:workerapp/controller/auth_controller.dart';
 import 'package:workerapp/data/model/response/shift_model.dart';
+import 'package:workerapp/data/model/response/userInfo_model.dart';
 import 'package:workerapp/utils/app_images.dart';
 import 'package:workerapp/utils/app_strings.dart';
 import 'package:workerapp/utils/color_constants.dart';
 import 'package:workerapp/utils/dimensions.dart';
+import '../../../../data/model/response/client_model.dart';
 import '../../../../utils/styles.dart';
 
 class ProfileWidgetPortion extends StatelessWidget {
@@ -15,9 +18,11 @@ class ProfileWidgetPortion extends StatelessWidget {
   final bool? isAddressRequired;
   final bool wantTimeScheduleWidget;
   final ShiftModel? shiftModel;
+  final ClientModel? clientModel;
+  final UserInfoModel? userInfoModel;
 
 
-  const ProfileWidgetPortion({Key? key, this.isMyProfile=false, this.currentIndex=1,  this.onclick=false, this.wantTimeScheduleWidget=true, this.isShiftNote=false,this.isAddressRequired=true, this.shiftModel,}) : super(key: key);
+  const ProfileWidgetPortion({Key? key, this.isMyProfile=false, this.currentIndex=1,  this.onclick=false, this.wantTimeScheduleWidget=true, this.isShiftNote=false,this.isAddressRequired=true, this.shiftModel,this.clientModel, this.userInfoModel,}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,9 @@ class ProfileWidgetPortion extends StatelessWidget {
               children: [
                 Expanded(
                   flex:1,
-                  child: shiftModel!=null?Image.network(
+                  child: userInfoModel!=null?Image.network(
+                    userInfoModel!.profilePic,
+                  ):shiftModel!=null?Image.network(
                       shiftModel!.profile,
                   ):Image.asset(Images.profile),
                 ),
@@ -45,7 +52,7 @@ class ProfileWidgetPortion extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        shiftModel!=null? shiftModel!.name:"Ms. Alix Tamayo Witherspoon",
+                        userInfoModel!=null?userInfoModel!.name:clientModel!=null?clientModel!.name: shiftModel!=null? shiftModel!.name:"Ms. Alix Tamayo Witherspoon",
                         style: montserratMedium.copyWith(fontSize: 19,color: Colors.black),),
                       const SizedBox(height: 10,),
                       isAddressRequired!
@@ -60,7 +67,7 @@ class ProfileWidgetPortion extends StatelessWidget {
                           ),
                           const SizedBox(width: 12,),
                           Text(
-                              shiftModel!=null? shiftModel!.address:"Unit 3, 171 - 179 Queen Street Campbelltown, NSW. 2560 ",
+                              userInfoModel!=null?userInfoModel!.address:clientModel!=null?clientModel!.address:shiftModel!=null? shiftModel!.address:"Unit 3, 171 - 179 Queen Street Campbelltown, NSW. 2560 ",
                             style: montserratMedium.copyWith(fontSize: 12,color: const Color(0xFF1270B0),height: 1.5)
                           ),
                           const Spacer(),
@@ -337,27 +344,27 @@ class ExtraInfoRow extends StatelessWidget {
               )
             ],
           )),
-          Expanded(child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Image.asset(
-                Images.alertRed,
-                //color: const Color(0xFFFC2E00),
-               scale: 3,
-              ),
-              const SizedBox(
-                width: 15,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  TextWidgetWithNumber(number: '1.', label: "Allergic to Nuts",),
-                  TextWidgetWithNumber(number: '2.', label: "Has a dog",),
-                  TextWidgetWithNumber(number: '3.', label: "Ring client first",),
-                ],
-              )
-            ],
-          ))
+          // Expanded(child: Row(
+          //   crossAxisAlignment: CrossAxisAlignment.start,
+          //   children: [
+          //     Image.asset(
+          //       Images.alertRed,
+          //       //color: const Color(0xFFFC2E00),
+          //      scale: 3,
+          //     ),
+          //     const SizedBox(
+          //       width: 15,
+          //     ),
+          //     Column(
+          //       crossAxisAlignment: CrossAxisAlignment.start,
+          //       children: const [
+          //         TextWidgetWithNumber(number: '1.', label: "Allergic to Nuts",),
+          //         TextWidgetWithNumber(number: '2.', label: "Has a dog",),
+          //         TextWidgetWithNumber(number: '3.', label: "Ring client first",),
+          //       ],
+          //     )
+          //   ],
+          // ))
         ],
       ),
     );

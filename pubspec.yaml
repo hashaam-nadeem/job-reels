@@ -46,7 +46,7 @@ dependencies:
   scrollable_positioned_list:
   focused_menu: ^1.0.5
   flutter_switch: ^0.3.2
-  table_calendar: ^3.0.8
+  table_calendar: ^3.0.9
   shimmer: ^2.0.0
   downloads_path_provider_28: ^0.1.2
   file_icon: ^1.0.0

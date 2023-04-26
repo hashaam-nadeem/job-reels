@@ -4,6 +4,7 @@ import 'package:flutter_neumorphic/flutter_neumorphic.dart';
 import 'package:get/get.dart';
 import 'package:workerapp/controller/bottom_bar_controller.dart';
 import 'package:workerapp/controller/client_controller.dart';
+import 'package:workerapp/data/model/response/client_model.dart';
 import 'package:workerapp/view/screens/clientDetail/widget/shift_notes.dart';
 
 import '../../../controller/auth_controller.dart';
@@ -27,21 +28,22 @@ class ClientDetails extends StatefulWidget {
 }
 
 class _ClientDetailsState extends State<ClientDetails> {
+
+  ClientModel? clientModel;
   int currentTabIndex = 0;
   List<Widget>tabBarWidgetList = <Widget>[
-    const DocumentWidget(isAdd: false,),
-     const ShiftNotes(),
+     DocumentWidget(isAdd: false,clientId: Get.find<BottomBarController>().clientId,),
+    ShiftNotes(clientId: Get.find<BottomBarController>().clientId,),
   ];
 late List<ParticipantTag> participantTag;
-int clientId=Get.find<BottomBarController>().clientId ?? 0;
+  int clientId=Get.find<BottomBarController>().clientId ?? 0;
   @override
   void initState() {
     Get.find<ClientController>().fetchClientDetail(clientsId: clientId).then((value){
       if(value.containsKey(API_RESPONSE.SUCCESS)){
-        //shiftModel=ShiftModel.fromJson(value[API_RESPONSE.SUCCESS]['data']);
+        clientModel=ClientModel.fromJson(value[API_RESPONSE.SUCCESS]['data']);
         // participantTag=List<ParticipantTag>.from(ParticipantTag.fromJson(value[API_RESPONSE.SUCCESS]['participant_tags']).map((model)=> ParticipantTag.fromJson(model)));
-        // participantTag = ParticipantTag.fromJson(value[API_RESPONSE.SUCCESS]['participant_tags'])!=null?List<ParticipantTag>.from(json['participant_tags'].map((model)=> ParticipantTag.fromJson(model))):[];
-        // setState((){});
+         setState((){});
       }
     });
     super.initState();
@@ -70,7 +72,78 @@ int clientId=Get.find<BottomBarController>().clientId ?? 0;
                 return Column(
                 // physics: const BouncingScrollPhysics(),
                 children:  [
-                const ProfileWidgetPortion(wantTimeScheduleWidget: false,),
+                  clientModel!=null? ProfileWidgetPortion(clientModel:clientModel!,onclick:false,wantTimeScheduleWidget:false):const SizedBox(),
+                  clientModel!=null?Material(
+                    elevation: 5,
+                    child: Container(
+                      width: double.infinity,
+                      color: const Color(0xFFFFECDC),
+                      padding: const EdgeInsets.symmetric(horizontal: 24,vertical: 15),
+                      child: Row(
+                        children: [
+                          Image.asset(Images.alert,height: 26,width: 30,),
+                          const SizedBox(width: 20,),
+                          Expanded(
+                            child: Text(
+                              clientModel!.alert,
+                              style: montserratMedium.copyWith(fontSize: 14,color: const Color(0xFFE77C40),fontWeight: FontWeight.w500,),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ):const SizedBox(),
+                  const SizedBox(height: 20,),
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   child: Row(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     mainAxisAlignment: MainAxisAlignment.end,
+                  //     children: [
+                  //       Expanded(
+                  //         flex:1,
+                  //         child: clientModel!=null?Image.asset(Images.profile):Image.network(
+                  //           clientModel!.name,
+                  //         ),
+                  //       ),
+                  //       const SizedBox(width: 10,),
+                  //       Expanded(
+                  //         flex: 3,
+                  //         child: Padding(
+                  //           padding: const EdgeInsets.only(top: 12.0),
+                  //           child: Column(
+                  //             crossAxisAlignment: CrossAxisAlignment.start,
+                  //             mainAxisAlignment: MainAxisAlignment.center,
+                  //             children: [
+                  //               Text(
+                  //                 clientModel!=null?clientModel!.name:"Ms. Alix Tamayo Witherspoon",
+                  //                 style: montserratMedium.copyWith(fontSize: 19,color: Colors.black),),
+                  //               const SizedBox(height: 10,),
+                  //              Row(
+                  //                 crossAxisAlignment: CrossAxisAlignment.start,
+                  //                 children: [
+                  //                   Image.asset(
+                  //                     Images.location,
+                  //                     color: const Color(0xFFFC2E00),
+                  //                     width: 22,
+                  //                     height: 33,
+                  //                   ),
+                  //                   const SizedBox(width: 12,),
+                  //                   Text(
+                  //                       clientModel!=null?clientModel!.address:"Unit 3, 171 - 179 Queen Street Campbelltown, NSW. 2560 ",
+                  //                       style: montserratMedium.copyWith(fontSize: 12,color: const Color(0xFF1270B0),height: 1.5)
+                  //                   ),
+                  //                   const Spacer(),
+                  //                 ],
+                  //               ),
+                  //
+                  //             ],
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ],
+                  //   ),
+                  // ),
                   NeumorphicToggle(
                     style: const NeumorphicToggleStyle(
                       depth: 200,

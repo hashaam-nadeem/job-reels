@@ -1,18 +1,15 @@
-import 'package:file_icon/file_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:workerapp/controller/client_controller.dart';
 import 'package:workerapp/utils/app_images.dart';
 import 'package:workerapp/utils/styles.dart';
-import 'package:workerapp/view/base/custom_button.dart';
-
 import '../../../../helper/route_helper.dart';
 
 class DocumentWidget extends StatefulWidget {
   final bool? isAdd;
-  const DocumentWidget({Key? key, this.isAdd=true}) : super(key: key);
+  final int? clientId;
+  const DocumentWidget({Key? key, this.isAdd=true, this.clientId}) : super(key: key);
 
   @override
   State<DocumentWidget> createState() => _DocumentWidgetState();
@@ -21,22 +18,16 @@ class DocumentWidget extends StatefulWidget {
 class _DocumentWidgetState extends State<DocumentWidget> {
   @override
   void initState() {
-
      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-       Get.find<ClientController>().fetchDocument();
+       Get.find<ClientController>().fetchDocument(page: 1, clientId: widget.clientId??0,);
      });
-    //     value) {
-    //   if (value.containsKey(API_RESPONSE.SUCCESS)) {
-    //     shiftModel = ShiftModel.fromJson(value[API_RESPONSE.SUCCESS]['data']);
-    //     setState(() {});
-    //   }
-    // });
     super.initState();
   }
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ClientController>(builder: (clientController){
       return Column(
+
         children: [
           Padding(
             padding: const EdgeInsets.all(5),
@@ -70,60 +61,13 @@ class _DocumentWidgetState extends State<DocumentWidget> {
                           DocumentRow(
                             iconWidget: clientController.documentList[index].filetype =="file" ?const Icon(Icons.file_present_rounded, size: 35,): Image.asset(Images.folder,color: const Color(0xFF1554F6),height: 18,width: 20,),
                             //leadingIcon: Images.folder,
-                            title: clientController.documentList[index].shortFileName,
+                            title: clientController.documentList[index].fileName,
                             counter: null,
                           ),
                           const Padding(
                             padding: EdgeInsets.symmetric(horizontal: 30),
                             child: Divider(),
                           ),
-                          // DocumentRow(
-                          //   leadingIcon: Images.pdf,
-                          //   title: 'Profile',
-                          //   counter: null,
-                          //   isColoredIcon: false,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: 30),
-                          //   child: Divider(),
-                          // ),
-                          // DocumentRow(
-                          //   leadingIcon: Images.jpeg,
-                          //   title: 'Wheelchair- front',
-                          //   counter: null,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: 30),
-                          //   child: Divider(),
-                          // ),
-                          // DocumentRow(
-                          //   leadingIcon: Images.jpeg,
-                          //   title: 'Taxi position',
-                          //   counter: null,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: 30),
-                          //   child: Divider(),
-                          // ),
-                          // DocumentRow(
-                          //   leadingIcon: Images.wordDoc,
-                          //   title: 'Nutrition and Swallowing Checklist',
-                          //   counter: null,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: 30),
-                          //   child: Divider(),
-                          // ),
-                          // DocumentRow(
-                          //   leadingIcon: Images.wordDoc,
-                          //   title: 'Hazardous Substance and material type Hazardous Substance and material type document for future.....',
-                          //   counter: null,
-                          // ),
-                          // Padding(
-                          //   padding: EdgeInsets.symmetric(horizontal: 30),
-                          //   child: Divider(),
-                          // ),
-                          // SizedBox(height: 5,),
                         ],
                       );
                     },

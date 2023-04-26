@@ -157,7 +157,7 @@ class _MyShiftsScreenState extends State<MyShiftsScreen> {
                           itemCount: shiftController.shiftListsByDate.length,
                           shrinkWrap: true,
                           itemBuilder:(BuildContext context, int index){
-                            return ShiftTimeDetailsRow(shitTimeDetailsModel: shitTimeDetailsList[index], shift: shiftController.shiftListsByDate[index],);
+                            return ShiftTimeDetailsRow(shift: shiftController.shiftListsByDate[index],);
                           }
                       )
                           :Padding(

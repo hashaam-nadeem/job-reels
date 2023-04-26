@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/modals.dart';
@@ -15,6 +14,7 @@ import 'package:workerapp/utils/dimensions.dart';
 import 'package:workerapp/utils/styles.dart';
 import 'package:workerapp/view/base/custom_app_bar.dart';
 import 'package:workerapp/view/base/custom_button.dart';
+import 'package:workerapp/view/base/custom_snackbar.dart';
 import 'package:workerapp/view/screens/shift/widgets/profile_widget_portion.dart';
 import 'package:workerapp/view/screens/shift/widgets/time_line_widget.dart';
 import '../../../controller/auth_controller.dart';
@@ -75,7 +75,7 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
               menuItems: [
                 FocusedMenuItem(// D// ISABLED THIS ITEM
                   onPressed: (){
-                    Get.find<BottomBarController>().changeTabIndex(3,isShowsSelected: false);
+                    Get.find<BottomBarController>().changeTabIndex(3,isShowsSelected: false,clientsId:shiftModel!.clientId);
                      // Get.toNamed(RouteHelper.getClientDetailRoute());
                   },
                     title: Container(
@@ -136,7 +136,7 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                                     border: Border.all(color: const Color(0xFFE4E6F1),)
                                 ),
                                 child: Text(
-                                  'Lorem ipsum is simply dummy text of the printing and typesetting industry.',
+                                  shiftModel!.jobDescription,
                                   style: montserratRegular.copyWith(
                                     color: const Color(0xFF6B7094),
                                     fontSize: 14,
@@ -157,21 +157,7 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '1. Take client for outing in your vehicle',
-                                      style: montserratRegular.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Text(
-                                      '2. Update Illustration',
-                                      style: montserratRegular.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Text(
-                                      '3. Design Landing',
+                                      shiftModel!.taskList,
                                       style: montserratRegular.copyWith(
                                         fontSize: 14,
                                         fontWeight: FontWeight.w500,
@@ -359,21 +345,31 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                   return CustomButton(
                     onPressed: timeComplete && shiftModel!=null
                         ?(){
-                      shiftController.updateStatus(code: shiftModel!.code, status: "In progress",).then((value) {
-                        if(value.containsKey(API_RESPONSE.SUCCESS)){
-                          bottomBarController.changeMainScreenBottomNavIndex(3);
-                          bottomBarController.changeTabIndex(1,shiftModels: shiftModel!,);
-                          setState((){});
-                        }
-                      });
-
+                      // shiftController.updateStatus(code: shiftModel!.code, status: "In progress",).then((value) {
+                      //   if(value.containsKey(API_RESPONSE.SUCCESS)){
+                      //     bottomBarController.changeMainScreenBottomNavIndex(3);
+                      //     bottomBarController.changeTabIndex(1,shiftModels: shiftModel!,);
+                      //     setState((){});
+                      //   }
+                      // });
+                      if(shiftModel!.status!="Completed"){
+                        shiftController.clockIn(code: shiftModel!.code,).then((value) {
+                          if(value.containsKey(API_RESPONSE.SUCCESS)){
+                            bottomBarController.changeMainScreenBottomNavIndex(3);
+                            bottomBarController.changeTabIndex(1,shiftModels: shiftModel!,);
+                            setState((){});
+                          }
+                        });
+                      }else{
+                        showCustomSnackBar("Shift has been completed");
+                      }
                     }
                         :(){},
-                    icon: Image.asset(Images.clockIn,width: 20, height: 20,),
+                    icon: shiftModel!.status!="Completed"? Image.asset(Images.clockIn,width: 20, height: 20,): null,
                     iconAtStart: false,
                     width: 220,
                     color: timeComplete? const Color(0xff65DACC):const Color(0xFF6A7580),
-                    buttonText: 'Clock In',
+                    buttonText: shiftModel!.status!="Completed"? 'Clock In' : "Shift Completed",
                     radius: 12,
                   );
                 }),

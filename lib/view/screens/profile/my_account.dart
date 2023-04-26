@@ -63,7 +63,7 @@ void initState() {
             color: AppColor.scaffoldBackGroundColor,
             child: Column(
               children: [
-                ProfileWidgetPortion(isMyProfile: true,currentIndex: currentTabIndex,),
+                ProfileWidgetPortion(isMyProfile: true,currentIndex: currentTabIndex,userInfoModel: Get.find<AuthController>().userInfoModel,),
                 NeumorphicToggle(
                   style: const NeumorphicToggleStyle(
                     depth: 200,

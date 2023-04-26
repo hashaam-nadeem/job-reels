@@ -19,13 +19,13 @@ class ClientController extends GetxController implements GetxService {
    bool _isFetchingData = true;
   bool get isDataFetching => _isFetchingData;
 
-  Future<Map<String, dynamic>> fetchNotes() async {
+  Future<Map<String, dynamic>> fetchNotes({required int clientId, required int page}) async {
     _isFetchingData=true;
     update();
-    Map<String,dynamic> response = await clientRepo.fetchNotes();
+    Map<String,dynamic> response = await clientRepo.fetchNotes(page: page, clientId: clientId,);
     if(response.containsKey(API_RESPONSE.SUCCESS)){
       _notesList.clear();
-      List<dynamic> listNotes = response[API_RESPONSE.SUCCESS]['data'];
+      List<dynamic> listNotes = response[API_RESPONSE.SUCCESS]['data']['data'];
       for(var data in listNotes){
         _notesList.insert(0, NotesModel.fromJson(data));
       }
@@ -35,13 +35,14 @@ class ClientController extends GetxController implements GetxService {
     return response;
   }
 
-  Future<Map<String, dynamic>> fetchDocument() async {
+  Future<Map<String, dynamic>> fetchDocument({required clientId,required page}) async {
     _isFetchingData=true;
     update();
-    Map<String,dynamic> response = await clientRepo.fetchDocument();
+    Map<String,dynamic> response = await clientRepo.fetchDocument(clientId: clientId, page: page);
     if(response.containsKey(API_RESPONSE.SUCCESS)){
       _documentList.clear();
-      List<dynamic> listNotes = response[API_RESPONSE.SUCCESS]['data'];
+      List<dynamic> listNotes = response[API_RESPONSE.SUCCESS]['data']['data'];
+      print("listNotes...............$listNotes");
       for(var data in listNotes){
         _documentList.insert(0, DocumentModel.fromJson(data));
       }

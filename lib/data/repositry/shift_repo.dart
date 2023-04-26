@@ -40,14 +40,25 @@ class ShiftRepo{
     return await apiObject.downloadApiRequest(isShowLoading: false,  isCheckAuthorization: true);
   }
 
-  Future<Map<String, dynamic>> updateStatus({required String code,required String status}) async {
+  Future<Map<String, dynamic>> clockIn({required String code,}) async {
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstant.UPDATE_STATUS,
+      apiUrl: AppConstant.CLOCK_IN,
       apiRequestMethod: API_REQUEST_METHOD.POST,
       isWantSuccessMessage: true,
       body: ApiClient.FormData.fromMap({
         "code": code,
-        "status": status,
+      }),
+    );
+    return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
+  }
+
+  Future<Map<String, dynamic>> clockOut({required String code,}) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstant.CLOCK_OUT,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: true,
+      body: ApiClient.FormData.fromMap({
+        "code": code,
       }),
     );
     return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
@@ -68,6 +79,34 @@ class ShiftRepo{
           "used_own_vehicle":vehicleUse,
         },
         "client_signature":path,
+      }),
+    );
+    return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
+  }
+
+  Future<Map<String, dynamic>> addAvailability({required int availability,required String startDate,required String endDate}) async {
+    Map<String, dynamic> body = {
+      "start_date":startDate,
+      "end_date":endDate,
+      "availability":availability,
+    };
+    print("body:-> $body");
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstant.AVAILABILITY,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: true,
+      body: ApiClient.FormData.fromMap(body),
+    );
+    return await apiObject.requestAPI(isShowLoading: true,  isCheckAuthorization: true);
+  }
+
+  Future<Map<String, dynamic>> fetchAvailability({required int page}) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: "${AppConstant.FETCH_AVAILABILITY}?page=$page",
+      apiRequestMethod: API_REQUEST_METHOD.GET,
+      isWantSuccessMessage: false,
+      body: ApiClient.FormData.fromMap({
+        "page":page,
       }),
     );
     return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
