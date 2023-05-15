@@ -1,9 +1,10 @@
 import 'dart:async';
-import 'dart:ui';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:focused_menu/modals.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:workerapp/controller/bottom_bar_controller.dart';
 import 'package:workerapp/controller/shift_controller.dart';
 import 'package:workerapp/data/model/response/document_model.dart';
@@ -14,7 +15,6 @@ import 'package:workerapp/utils/dimensions.dart';
 import 'package:workerapp/utils/styles.dart';
 import 'package:workerapp/view/base/custom_app_bar.dart';
 import 'package:workerapp/view/base/custom_button.dart';
-import 'package:workerapp/view/base/custom_snackbar.dart';
 import 'package:workerapp/view/screens/shift/widgets/profile_widget_portion.dart';
 import 'package:workerapp/view/screens/shift/widgets/time_line_widget.dart';
 import '../../../controller/auth_controller.dart';
@@ -42,12 +42,12 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
           setState((){});
         }
       });
-    Timer.periodic(const Duration(seconds: 15), (timer) {
+    // Timer.periodic(const Duration(seconds: 15), (timer) {
           timeComplete=true;
-         if(mounted){
-           setState((){});
-         }
-    });
+    //      if(mounted){
+    //        setState((){});
+    //      }
+    // });
     super.initState();
   }
 
@@ -97,30 +97,31 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
       ),
       body: SafeArea(
           child: GetBuilder<ShiftController>(builder: (shiftController) {
-            return shiftController.isDataFetching&&shiftModel.isNull
+            return shiftController.isDataFetching && shiftModel == null
                 ?const Center(child: CircularProgressIndicator(),)
                 : Container(
               width:context.width,
               height: context.height,
               color: AppColor.scaffoldBackGroundColor,
               child: GetBuilder<AuthController>(builder: (authController) {
-                DateTime startDate = DateFormat("hh:mma").parse(shiftModel!.breakDetailModel!=null? "${shiftModel!.breakDetailModel!.startTime}PM" :"");
-                DateTime endDate = DateFormat("hh:mma").parse(shiftModel!.breakDetailModel!=null?"${shiftModel!.breakDetailModel!.endTime}PM":"");
-                Duration diff = endDate.difference(startDate);
-                int hour=00;
-                int minust=00;
-                final List<String> durations = diff.toString().split(':');
-                    if(int.parse(durations[0]) > 0){
-                      hour=int.parse(durations[0]);
-                    }
-                if(int.parse(durations[1]) > 0){
-                  minust=int.parse(durations[1]);
+                int hours=00;
+                int minutes=00;
+                if(shiftModel!=null){
+                  DateTime startDate = DateFormat("hh:mma").parse(shiftModel!.breakDetailModel!=null? "${shiftModel!.breakDetailModel!.startTime}PM" :"");
+                  DateTime endDate = DateFormat("hh:mma").parse(shiftModel!.breakDetailModel!=null?"${shiftModel!.breakDetailModel!.endTime}PM":"");
+                  Duration diff = endDate.difference(startDate);
+                  final List<String> durations = diff.toString().split(':');
+                  if(int.parse(durations[0]) > 0){
+                    hours=int.parse(durations[0]);
+                  }
+                  if(int.parse(durations[1]) > 0){
+                    minutes=int.parse(durations[1]);
+                  }
                 }
-                // print("diff........>${diff}");
                 return ListView(
                     physics: const BouncingScrollPhysics(),
                     children: [
-                      ProfileWidgetPortion(onclick: timeComplete,shiftModel:shiftModel,),
+                      ProfileWidgetPortion(onclick: timeComplete,shiftModel:shiftModel!,),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal:Dimensions.PADDING_SIZE_DEFAULT),
                         child: Column(
@@ -153,18 +154,36 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                               tileChildWidget: Container(
                                 padding: const EdgeInsets.all(12),
                                 margin: const EdgeInsets.only(top: 8,),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      shiftModel!.taskList,
-                                      style: montserratRegular.copyWith(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
+                                child: SizedBox(
+                                  height: 70,
+                                  width: context.width,
+                                  child: ListView.builder(
+                                    // shrinkWrap: true,
+                                    physics: const BouncingScrollPhysics(),
+                                    itemCount: shiftModel!.taskList.length,
+                                    itemBuilder: (BuildContext context, int index) {
+                                      return
+                                      Text(
+                                        "${index+1}. ${shiftModel!.taskList[index].content}",
+                                        style: montserratRegular.copyWith(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      );
+                                    },),
                                 ),
+                                // Column(
+                                //   crossAxisAlignment: CrossAxisAlignment.start,
+                                //   children: [
+                                //     Text(
+                                //       shiftModel!.taskList[index].t,
+                                //       style: montserratRegular.copyWith(
+                                //         fontSize: 14,
+                                //         fontWeight: FontWeight.w500,
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
                               ),
                             ),
                             CustomTimeLineWidget(
@@ -331,7 +350,7 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                                     border: Border.all(color: const Color(0xFFE4E6F1),)
                                 ),
                                 child: Text(
-                                  'You will need to take your break for ${hour > 0? hour.toString():""} ${hour > 0? "hour":""}${minust > 0? hour.toString():""} ${minust > 0? "minutes":""} from ${shiftModel!.breakDetailModel!=null?shiftModel!.breakDetailModel!.startTime:""} - ${shiftModel!.breakDetailModel!=null? shiftModel!.breakDetailModel!.endTime:""}. This break will be ${shiftModel!.breakDetailModel!=null? shiftModel!.breakDetailModel!.status:""}.',
+                                  'You will need to take your break for ${hours > 0? hours.toString():""} ${hours > 0? "hour":""}${minutes > 0? hours.toString():""} ${minutes > 0? "minutes":""} from ${shiftModel!.breakDetailModel!=null?shiftModel!.breakDetailModel!.startTime:""} - ${shiftModel!.breakDetailModel!=null? shiftModel!.breakDetailModel!.endTime:""}. This break will be ${shiftModel!.breakDetailModel!=null? shiftModel!.breakDetailModel!.status:""}.',
                                   style: montserratRegular.copyWith(
                                     color: const Color(0xFF6B7094),
                                     fontSize: 14,
@@ -344,7 +363,7 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                 GetBuilder<BottomBarController>(builder: (bottomBarController){
                   return CustomButton(
                     onPressed: timeComplete && shiftModel!=null
-                        ?(){
+                        ?()async{
                       // shiftController.updateStatus(code: shiftModel!.code, status: "In progress",).then((value) {
                       //   if(value.containsKey(API_RESPONSE.SUCCESS)){
                       //     bottomBarController.changeMainScreenBottomNavIndex(3);
@@ -352,17 +371,29 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
                       //     setState((){});
                       //   }
                       // });
-                      if(shiftModel!.status!="Completed"){
-                        shiftController.clockIn(code: shiftModel!.code,).then((value) {
+
+                      try {
+                        Position position = await _determinePosition();
+                        debugPrint("position LatLng:-> (${position.latitude},${position.longitude})");
+                        shiftController.clockIn(code: shiftModel!.code, lat: position.latitude.toString(),lng: position.longitude.toString()).then((value) {
                           if(value.containsKey(API_RESPONSE.SUCCESS)){
                             bottomBarController.changeMainScreenBottomNavIndex(3);
                             bottomBarController.changeTabIndex(1,shiftModels: shiftModel!,);
                             setState((){});
                           }
                         });
-                      }else{
-                        showCustomSnackBar("Shift has been completed");
+                        // Use position.latitude and position.longitude
+                      } catch (e) {
+                        // Handle exceptions
+                        debugPrint("Exception:-> $e");
                       }
+
+                      // if(shiftModel!.status!="Completed"){
+                      //
+
+                      // }else{
+                      //   showCustomSnackBar("Shift has been completed");
+                      // }
                     }
                         :(){},
                     icon: shiftModel!.status!="Completed"? Image.asset(Images.clockIn,width: 20, height: 20,): null,
@@ -393,6 +424,68 @@ class ShiftDetailsScreenState extends State<ShiftDetailsScreen> {
           }),
       )
     );
+  }
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Test if location services are enabled.
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    // if (!serviceEnabled) {
+    //   // Location services are not enabled don't continue
+    //   // accessing the position and request users of the
+    //   // App to enable the location services.
+    //   return Future.error('Location services are disabled.');
+    // }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied||!serviceEnabled) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        showDialog(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Location permissions required'),
+            content: const Text('Please enable location permissions to use this feature.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  bool isOpened = await openAppSettings();
+                  if (!isOpened) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enable location permissions manually.'),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+        throw Exception('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
   }
 
   Future<void>downloadFileDialog({ required DocumentModel documentModel})async{

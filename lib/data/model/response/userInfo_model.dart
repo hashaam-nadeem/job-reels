@@ -19,6 +19,8 @@ class UserInfoModel {
   List<DocumentModel> documents;
   bool isVerified;
   int expireIn;
+  int allowedRadius;
+  int allowedTime;
 
   UserInfoModel(
       {
@@ -40,6 +42,8 @@ class UserInfoModel {
         required this.documents,
         required this.documentExpiring,
         required this.nextShiftMessage,
+        required this.allowedRadius,
+        required this.allowedTime,
       });
 //
   factory UserInfoModel.fromJson(Map<String, dynamic> json) {
@@ -62,7 +66,8 @@ class UserInfoModel {
       profilePic : json['profile']??"",
       documents : json['documents']!=null?List<DocumentModel>.from(json['documents'].map((model)=> DocumentModel.fromJson(model))):[],
       expireIn : json['expires_in']?? 0,
-
+      allowedRadius: json['allowed_radius']??100,
+      allowedTime: json['allowed_time']??10
     );
   }
 //
@@ -82,6 +87,8 @@ class UserInfoModel {
     data['document_expiring'] = documentExpiring;
     data['expiry_message'] = expiryMessage;
     data['profile'] = profilePic;
+    data['allowed_time'] = allowedTime;
+    data['allowed_radius'] = allowedRadius;
     data['email_verified_at'] = isVerified?"05-10-2022":null;
     return data;
   }

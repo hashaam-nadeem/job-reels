@@ -129,7 +129,8 @@ class ProfileWidgetPortion extends StatelessWidget {
                             TimeScheduleWidget(scheduledTime: '--    ${shiftModel!=null?shiftModel!.endTime:"12:00"}',),
                           ],
                         ),
-                        const TimeScheduleWidget(scheduledTime: '30 mints 11:30 - 12:00', imagePath: Images.coffee),
+                        if(shiftModel!=null)
+                          TimeScheduleWidget(scheduledTime: '${shiftModel!.totalHours} hour${shiftModel!.totalHours>1?'s':''} ${shiftModel!.breakDetailModel?.startTime??''} - ${shiftModel!.breakDetailModel?.endTime??''}', imagePath: Images.coffee),
                       ],
                     ),
                   ),
@@ -138,7 +139,8 @@ class ProfileWidgetPortion extends StatelessWidget {
                   flex: 2,
                   child: Column(
                     children:  [
-                      const AllocatedProcessingWidget(containerText: 'Allocated'),
+                      if(shiftModel!=null)
+                        AllocatedProcessingWidget(containerText: shiftModel!.status),
                       isShiftNote!
                           ? Padding(
                         padding: const EdgeInsets.only(left: 10,right: 10,top: 8,bottom: 5),
@@ -317,7 +319,7 @@ class ExtraInfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return shiftModel.participantTag.isEmpty ? const SizedBox() : Container(
       padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

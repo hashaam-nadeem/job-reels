@@ -12,7 +12,7 @@ class ParticipantTag {
   factory ParticipantTag.fromJson(Map<String, dynamic> json) {
     return ParticipantTag(
       id : json['id'],
-      name : json['name'],
+      name : json['name']??"",
 
     );
   }

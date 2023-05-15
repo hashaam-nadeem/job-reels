@@ -1,5 +1,6 @@
 import 'package:workerapp/data/model/response/document_model.dart';
 import 'package:workerapp/data/model/response/participantTag_model.dart';
+import 'package:workerapp/data/model/response/task_model.dart';
 
 import 'break_detail_model.dart';
 
@@ -20,7 +21,7 @@ class ShiftModel {
   List<ParticipantTag> participantTag;
   BreakDetailModel? breakDetailModel;
   String jobDescription;
-  String taskList;
+  List<Task> taskList;
   String note;
   List<DocumentModel> documentModel;
   // bool ?hasAnyIssue;
@@ -69,7 +70,7 @@ class ShiftModel {
       status : json['status']??"",
       totalHours : json['total_hour'] ?? 0,
       jobDescription : json['job_description']??"",
-      taskList : json['task_list']??"",
+      taskList :json['task_list']!=null?List<Task>.from(json['task_list'].map((model)=> Task.fromJson(model))):[],
       note : json['note']??"",
       breakDetailModel :breakDetail!=null? BreakDetailModel.fromJson(breakDetail):null,
       participantTag : json['participant_tags']!=null?List<ParticipantTag>.from(json['participant_tags'].map((model)=> ParticipantTag.fromJson(model))):[],

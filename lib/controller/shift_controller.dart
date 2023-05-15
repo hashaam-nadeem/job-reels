@@ -91,8 +91,8 @@ class ShiftController extends GetxController implements GetxService {
     return response;
   }
 
-  Future<Map<String, dynamic>> clockIn({required String code}) async {
-    Map<String,dynamic> response = await shiftRepo.clockIn(code: code);
+  Future<Map<String, dynamic>> clockIn({required String code,required String lat,required String lng}) async {
+    Map<String,dynamic> response = await shiftRepo.clockIn(code: code, lat: lat, lng: lng);
     return response;
   }
 

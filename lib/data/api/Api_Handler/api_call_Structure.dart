@@ -48,6 +48,7 @@ class API_STRUCTURE {
         "Authorization": "Bearer ${Get.find<AuthController>().authRepo.getAuthToken()}",
         });
       }
+      print("header.......>$header");
       ApiClient.Dio dio = ApiClient.Dio();
       ApiClient.Options options = ApiClient.Options(
         followRedirects: false,

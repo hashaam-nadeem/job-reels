@@ -40,16 +40,24 @@ class ShiftRepo{
     return await apiObject.downloadApiRequest(isShowLoading: false,  isCheckAuthorization: true);
   }
 
-  Future<Map<String, dynamic>> clockIn({required String code,}) async {
+  Future<Map<String, dynamic>> clockIn({required String code,required String lat,required String lng}) async {
+    Map<String,dynamic> body={
+      "code": code,
+      "lat_in":lat,
+      "long_in":lng,
+    };
+    print("body.........>$body");
     API_STRUCTURE apiObject = API_STRUCTURE(
       apiUrl: AppConstant.CLOCK_IN,
       apiRequestMethod: API_REQUEST_METHOD.POST,
       isWantSuccessMessage: true,
       body: ApiClient.FormData.fromMap({
         "code": code,
+        "lat_in":lat,
+        "long_in":lng,
       }),
     );
-    return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
+    return await apiObject.requestAPI(isShowLoading: true,  isCheckAuthorization: true);
   }
 
   Future<Map<String, dynamic>> clockOut({required String code,}) async {
@@ -61,7 +69,7 @@ class ShiftRepo{
         "code": code,
       }),
     );
-    return await apiObject.requestAPI(isShowLoading: false,  isCheckAuthorization: true);
+    return await apiObject.requestAPI(isShowLoading: true,  isCheckAuthorization: true);
   }
 
   Future<Map<String, dynamic>> updateShiftStatus({required String code,required String status,required String odometerStart,required String odometerEnd,required int vehicleUse, required String path}) async {

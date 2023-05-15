@@ -436,7 +436,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                                           context: context,
                                           hintText: AppString.text,
                                           height: 50,
-                                          width: 100,
+                                          width: 90,
                                           backGroundColor:Colors.transparent,
                                           contextPadding: 8,
                                           // fillColor: Colors.transparent,
@@ -474,7 +474,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 15,),
+                                  const SizedBox(width: 10,),
                                   Expanded(
                                     child: Row(
                                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -494,7 +494,7 @@ class _ShiftNotesScreenState extends State<ShiftNotesScreen> {
                                           context: context,
                                           hintText: AppString.text,
                                           height: 50,
-                                          width: 100,
+                                          width: 90,
                                           backGroundColor:Colors.transparent,
                                           contextPadding: 8,
                                           fontSize: 12,

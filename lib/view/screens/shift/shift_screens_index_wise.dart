@@ -27,7 +27,7 @@ class _ShiftScreensIndexWiseState extends State<ShiftScreensIndexWise> {
   ];
   @override
   Widget build(BuildContext context) {
-    print("Get.find<BottomBarController>().shiftModel...............${Get.find<BottomBarController>().shiftModel}");
+    print("Get.find<BottomBarController>().shiftScreensCurrentIndex...............${Get.find<BottomBarController>().shiftScreensCurrentIndex}");
     return SafeArea(
         child: Container(
           width:context.width,
