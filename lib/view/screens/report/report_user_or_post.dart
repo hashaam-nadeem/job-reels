@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:jobreels/controller/post_controller.dart';
 import 'package:jobreels/data/api/Api_Handler/api_error_response.dart';
+import 'package:jobreels/enums/report_type.dart';
 import 'package:jobreels/util/app_strings.dart';
 import 'package:jobreels/view/base/custom_app_bar.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +13,12 @@ import '../../base/custom_button.dart';
 import '../../base/my_text_field.dart';
 import '../../base/popup_alert.dart';
 
+
+
 class ReportVideo extends StatefulWidget {
-  final int postId;
-  const ReportVideo({Key? key, required this.postId,}) : super(key: key);
+  final int id;
+  final Report reportType;
+  const ReportVideo({Key? key, required this.id,required this.reportType,}) : super(key: key);
 
   @override
   State<ReportVideo> createState() => _ReportVideoState();
@@ -29,7 +33,8 @@ class _ReportVideoState extends State<ReportVideo> {
 
   @override
   void initState(){
-    Get.find<PostsController>().getReportFlags();
+
+    Get.find<PostsController>().getReportFlags(widget.reportType);
     super.initState();
   }
 
@@ -42,7 +47,7 @@ class _ReportVideoState extends State<ReportVideo> {
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: CustomAppBar(
-          title: AppString.reportVideo,
+          title: widget.reportType==Report.Post ? AppString.reportVideo : AppString.reportUser,
           titleColor: Theme.of(context).primaryColorLight,
           leading: IconButton(
             onPressed: (){
@@ -78,7 +83,7 @@ class _ReportVideoState extends State<ReportVideo> {
                             ),
                             ),
                             Text(
-                              AppString.iFoundThisVideoTobe.tr,
+                              widget.reportType==Report.Post ? AppString.iFoundThisVideoTobe.tr : AppString.iFoundThisUserTobe.tr,
                               textAlign: TextAlign.start,
                               style: montserratRegular.copyWith(
                                 fontSize: 16,
@@ -88,7 +93,7 @@ class _ReportVideoState extends State<ReportVideo> {
                             /// Report reason
                             GetBuilder<PostsController>(
                               builder: (PostsController postController){
-                                int totalReportFlags = postController.reportFlagList.length;
+                                int totalReportFlags = postController.reportFlagList(widget.reportType).length;
                                 if(totalReportFlags==0){
                                   return const SizedBox();
                                 }else{
@@ -97,7 +102,7 @@ class _ReportVideoState extends State<ReportVideo> {
                                     physics: const NeverScrollableScrollPhysics(),
                                     shrinkWrap: true,
                                     itemBuilder: (BuildContext context, int index){
-                                      ReportFlag reportFlag = postController.reportFlagList[index];
+                                      ReportFlag reportFlag = postController.reportFlagList(widget.reportType)[index];
                                       bool isSelected = selectedReportReason == reportFlag;
                                       return GestureDetector(
                                         onTap: (){
@@ -152,6 +157,7 @@ class _ReportVideoState extends State<ReportVideo> {
                               backgroundShadow: const Color(0xfff3f3f3),
                               hintText: AppString.enterDescription,
                             ),
+                            const SizedBox(height: Dimensions.PADDING_SIZE_DEFAULT,),
                             if(errorText.isNotEmpty)
                               Row(
                                 children: [
@@ -171,7 +177,7 @@ class _ReportVideoState extends State<ReportVideo> {
                                   ),
                                 ],
                               ),
-                            const SizedBox(height: Dimensions.PADDING_SIZE_LARGE),
+                            const SizedBox(height: Dimensions.PADDING_SIZE_EXTRA_SMALL),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -204,12 +210,12 @@ class _ReportVideoState extends State<ReportVideo> {
                                       }else{
                                         errorText = "";
                                         setState(() {});
-                                        postController.reportVideo(widget.postId, selectedReportReason!.id, _reportDescriptionController.text.trim()).then((result){
+                                        postController.reportVideo(widget.id, selectedReportReason!.id, _reportDescriptionController.text.trim(), reportType:  widget.reportType).then((result){
                                           if(result.containsKey(API_RESPONSE.SUCCESS)){
                                             showPopUpAlert(
                                               popupObject: PopupObject(
                                                 title: 'Success',
-                                                body: 'Video reported successfully',
+                                                body: '${widget.reportType==Report.Post ? "Video":"User"} reported successfully',
                                                 buttonText: "Ok",
                                                 onYesPressed: (){
                                                   Get.back();

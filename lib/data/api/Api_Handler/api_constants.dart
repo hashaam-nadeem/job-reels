@@ -31,7 +31,7 @@ class API_EXCEPTION{
  static String SOCKET = "Socket Exception \n Please Try again";
   static String HTTP = "Http Exception\n Please Try again";
   static String FORMAT = "Format Exception\n Please Try again later";
-  static String UNKNOWN = "Unknown Exception\n Please Try again later";
+  static String UNKNOWN = "Something went wrong";
 }
 class ResponseType{
   static String REQUEST_SUCCESSFULL = "REQUEST_SUCCESSFUL";

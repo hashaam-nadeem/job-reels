@@ -5,21 +5,37 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:jobreels/helper/notification_helper.dart';
+import 'package:path_provider/path_provider.dart';
 import 'controller/splash_controller.dart';
 import 'controller/theme_controller.dart';
 import 'helper/get_di.dart' as di;
+import 'helper/helper.dart';
 import 'helper/route_helper.dart';
+import 'helper/socket_helper.dart';
 import 'util/app_constants.dart';
 import 'util/messages.dart';
 
+
+Sockets jobReelSocket = Sockets();
+
 Future<void> main() async {
+  skillList.sort((skillA, skillB) => skillA.value.compareTo(skillB.value));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Color(0xFF5D17EB)
+    ), // Replace Colors.blue with your desired color
+  );
   HttpOverrides.global = MyHttpOverrides();
   WidgetsFlutterBinding.ensureInitialized();
+  await getApplicationDocumentsDirectory().then((value) => appDirectory = value);
   await Firebase.initializeApp();
   Map<String, Map<String, String>> languages = await di.init();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
+
+
   runApp(MyApp(languages: languages,));
 }
 
@@ -39,7 +55,11 @@ class MyApp extends StatelessWidget {
                     child = BotToastInit()(context,child);
                     child = MediaQuery(
                       data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0,),
-                      child: child,
+                      child: ScrollConfiguration(
+                          behavior: const ScrollBehavior().copyWith(
+                            overscroll: false
+                          ),
+                          child: child),
                     );
                     return child;
                   },
@@ -50,8 +70,8 @@ class MyApp extends StatelessWidget {
                   fallbackLocale: Locale(AppConstants.languages[0].languageCode, AppConstants.languages[0].countryCode),
                   initialRoute: RouteHelper.getSplashRoute(),
                   getPages: RouteHelper.routes,
-                  defaultTransition: Transition.rightToLeft,
-                  transitionDuration: const Duration(milliseconds: 300),
+                  defaultTransition: Transition.zoom,
+                  transitionDuration: const Duration(milliseconds: 200),
                 );
         });
       // });

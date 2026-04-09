@@ -1,20 +1,22 @@
 import 'dart:async';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:jobreels/view/base/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import '../../../util/app_strings.dart';
 import '../../base/custom_loader.dart';
 
-class PrivacyPolicyScreen extends StatefulWidget {
-  const PrivacyPolicyScreen({Key? key}) : super(key: key);
+class WebViewScreen extends StatefulWidget {
+  final String title;
+  final String url;
+  const WebViewScreen({Key? key, required this.title, required this.url}) : super(key: key);
 
   @override
-  State<PrivacyPolicyScreen> createState() => _PrivacyPolicyScreenState();
+  State<WebViewScreen> createState() => _WebViewScreenState();
 }
 
-class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
+class _WebViewScreenState extends State<WebViewScreen> {
   final Completer<WebViewController> _controller = Completer<WebViewController>();
-  final String _url=AppString.privacyPolicyUrl;
   final _key = UniqueKey();
   bool isLoading=true;
 
@@ -22,25 +24,38 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const CustomAppBar(title: AppString.privacyPolicy, leading: null,showLeading: true,),
+      appBar: CustomAppBar(
+        title: widget.title,
+        titleColor: Theme.of(context).primaryColorLight,
+        tileColor: Theme.of(context).primaryColor,
+        leading: IconButton(
+          onPressed: (){
+            Get.back();
+          },
+          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).primaryColorLight,size: 16,),
+        ),
+        showLeading: true,
+      ),
       body: SafeArea(
           child: Stack(
       children: [
       WebView(
       key: _key,
         javascriptMode: JavascriptMode.unrestricted,
-        initialUrl: _url,
+        initialUrl: widget.url,
         onWebViewCreated: (WebViewController webViewController) async {
           _controller.complete(webViewController);
         },
 
         onPageStarted: (url){
+        if(mounted) {
           setState(() {
             isLoading = false;
           });
+        }
         },
       ),
-      isLoading?CustomLoader():Stack(),
+      isLoading?const CustomLoader():Stack(),
       ],
     )
           // Scrollbar(

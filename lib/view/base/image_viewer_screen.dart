@@ -2,10 +2,10 @@
 // import 'package:get/get.dart';
 // import 'package:photo_view/photo_view.dart';
 // import 'package:photo_view/photo_view_gallery.dart';
-// import 'package:glow_solar/controller/item_controller.dart';
-// import 'package:glow_solar/controller/splash_controller.dart';
-// import 'package:glow_solar/data/model/response/item_model.dart';
-// import 'package:glow_solar/view/base/custom_app_bar.dart';
+// import 'package:jobreels/controller/item_controller.dart';
+// import 'package:jobreels/controller/splash_controller.dart';
+// import 'package:jobreels/data/model/response/item_model.dart';
+// import 'package:jobreels/view/base/custom_app_bar.dart';
 //
 // class ImageViewerScreen extends StatelessWidget {
 //   final Item item;

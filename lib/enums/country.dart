@@ -1,4 +1,4 @@
-enum ChargerPricingUnit{
-  Minute,
-  Kwh,
+enum Country{
+  Philippines,
+  USA,
 }

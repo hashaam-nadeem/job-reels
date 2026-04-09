@@ -1,22 +1,23 @@
-import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:jobreels/controller/auth_controller.dart';
+import 'package:jobreels/helper/route_helper.dart';
 import 'package:jobreels/util/dimensions.dart';
 import 'package:jobreels/view/base/custom_app_bar.dart';
 import 'package:jobreels/view/base/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jobreels/view/base/my_text_field.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:sms_otp_auto_verify/sms_otp_auto_verify.dart';
-
+import 'package:dio/dio.dart' as ApiClient;
+import '../../../../data/model/helpers.dart';
 import '../../../../util/app_strings.dart';
 import '../../../../util/styles.dart';
-import '../../../base/custom_snackbar.dart';
+import '../../../base/popup_alert.dart';
 
 class RegisterOtpVerificationScreen extends StatefulWidget {
-  final FormData registerFormData;
-  const RegisterOtpVerificationScreen({Key? key, required this.registerFormData}) : super(key: key);
+  final ApiClient.FormData registerFormData;
+  final String otpCode;
+  final bool isFreeLancer;
+  const RegisterOtpVerificationScreen({Key? key, required this.registerFormData, required this.otpCode, required this.isFreeLancer}) : super(key: key);
 
   @override
   RegisterOtpVerificationScreenState createState() => RegisterOtpVerificationScreenState();
@@ -24,20 +25,20 @@ class RegisterOtpVerificationScreen extends StatefulWidget {
 
 class RegisterOtpVerificationScreenState extends State<RegisterOtpVerificationScreen> {
 
-  StreamController<ErrorAnimationType> errorController = StreamController<ErrorAnimationType>();
-  TextEditingController otpPinController = TextEditingController();
   String otpCode = '';
-  final numberReg = RegExp(r'\d+', multiLine: true);
-
-  @override
-  void initState() {
-    _startListeningSms();
-    super.initState();
-  }
+  final TextEditingController _otpController = TextEditingController();
+  final FocusNode _otpFocusNode = FocusNode();
+  final _formKey = GlobalKey<FormState>();
+  String otpErrorText = '';
 
   @override
   void dispose() {
     super.dispose();
+  }
+  @override
+  void initState() {
+    otpCode = widget.otpCode;
+    super.initState();
   }
 
   @override
@@ -48,101 +49,109 @@ class RegisterOtpVerificationScreenState extends State<RegisterOtpVerificationSc
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        appBar: const CustomAppBar(title: null, leading: null,showLeading: true,),
+        appBar: CustomAppBar(
+          title: AppString.verifyCode,
+          titleColor: Theme.of(context).primaryColorLight,
+          leading: IconButton(
+            onPressed: (){
+              Get.back();
+            },
+            icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).primaryColorLight,size: 16,),
+          ),
+          tileColor: Theme.of(context).primaryColor,
+        ),
         body: SafeArea(
             child: Scrollbar(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Container(
                   width: context.width,
-                  padding:  const EdgeInsets.all(Dimensions.PADDING_SIZE_SMALL),
+                  padding:  const EdgeInsets.all(Dimensions.PADDING_SIZE_LARGE),
                   margin:  EdgeInsets.zero,
                   child: GetBuilder<AuthController>(builder: (authController) {
-                    return Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: Dimensions.PADDING_SIZE_EXTRA_LARGE),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppString.otpAuthentication.tr,
-                                style: montserratMedium.copyWith(fontSize: 18),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: Dimensions.PADDING_SIZE_SMALL),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Text(AppString.otpSentToPhoneNo.tr,
-                                  style: montserratRegular.copyWith(fontSize: 14),
+                    return Form(
+                      key: _formKey,
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const SizedBox(height: Dimensions.PADDING_SIZE_EXTRA_LARGE),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_DEFAULT),
+                              child: Text(
+                                AppString.signUpAsRemoteEmployee.tr,
+                                textAlign: TextAlign.center,
+                                style: montserratMedium.copyWith(
+                                  fontSize: 24,
+                                  color: Theme.of(context).primaryColor,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: Dimensions.PADDING_SIZE_LARGE),
-                          Column(
-                            children: [
-                              PinCodeTextField(
-                                length: 6,
-                                obscureText: false,
-                                animationType: AnimationType.fade,
-                                inputFormatters:[FilteringTextInputFormatter.digitsOnly],
-                                keyboardType: getKeyboardTypeForDigitsOnly(),
-                                pinTheme: PinTheme(
-                                  fieldHeight: 50,
-                                  fieldWidth: 50,
-                                  borderWidth: 0,
-                                  shape: PinCodeFieldShape.box,
-                                  borderRadius: BorderRadius.circular(5),
-                                  selectedColor: Theme.of(context).backgroundColor,
-                                  selectedFillColor: Theme.of(context).backgroundColor,
-                                  activeFillColor: Theme.of(context).backgroundColor,
-                                  activeColor: Theme.of(context).backgroundColor,
-                                  inactiveFillColor: Theme.of(context).backgroundColor,
-                                  inactiveColor: Theme.of(context).backgroundColor,
-                                  errorBorderColor: Theme.of(context).errorColor,
-                                ),
-                                textStyle: montserratMedium.copyWith(fontSize: 24),
-                                enableActiveFill: true,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                animationDuration: const Duration(milliseconds: 300),
-                                backgroundColor: Colors.transparent,
-                                errorAnimationController: errorController,
-                                controller: otpPinController,
-                                onChanged: (value) {
-                                  otpCode = value;
-                                },
-                                beforeTextPaste: (text) {
-                                  return false;
-                                },
-                                appContext: context,
+                            const SizedBox(height: Dimensions.PADDING_SIZE_EXTRA_LARGE),
+                            CustomInputTextField(
+                              controller: _otpController,
+                              focusNode: _otpFocusNode,
+                              isPassword: false,
+                              context: context,
+                              keyboardType: getKeyboardTypeForDigitsOnly(),
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              textInputAction: TextInputAction.done,
+                              labelText: AppString.verificationCode,
+                              onValueChange: (value){
+                                if(otpErrorText.isNotEmpty){
+                                  otpErrorText = "";
+                                  setState(() {});
+                                }
+                                return value;
+                              },
+                              validator: (inputData) {
+                                return inputData!.trim().isEmpty
+                                    ? ErrorMessage.otpCodeEmptyError
+                                    : null;
+                              },
+                            ),
+                            if(otpErrorText.isNotEmpty)
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 10,top: 8),
+                                      child: Text(
+                                        otpErrorText,
+                                        textAlign: TextAlign.start,
+                                        style: montserratRegular.copyWith(
+                                          color: Theme.of(context).errorColor,
+                                          fontSize: 14,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          const SizedBox(height: Dimensions.PADDING_SIZE_LARGE),
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                CustomButton(
-                                  width: context.width*.94,
-                                  height: 50,
-                                  radius: 10,
-                                  buttonText: AppString.conTinue.tr,
-                                  onPressed: (){
-                                    if(otpCode.length<6){
-                                      onInvalidOtpEntered();
-                                    }else{
-                                      _otpVerified(authController);
-                                    }
-                                  },
-                                ),
-                              ]),
-                          const SizedBox(height: 30),
-                        ]);
+                            const SizedBox(height: Dimensions.PADDING_SIZE_LARGE),
+                            Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  CustomButton(
+                                    width: 120,
+                                    height: 50,
+                                    radius: 50,
+                                    buttonText: AppString.verifyCode.tr,
+                                    onPressed: (){
+                                      if((_formKey.currentState?.validate()??true)){
+                                        if(_otpController.text.trim()==otpCode){
+                                          _otpVerified(authController);
+                                        }else{
+                                          onInvalidOtpEntered();
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ]),
+                            const SizedBox(height: 30),
+                          ]),
+                    );
                   }),
                 ),
               ),
@@ -152,25 +161,15 @@ class RegisterOtpVerificationScreenState extends State<RegisterOtpVerificationSc
   }
 
   void _otpVerified(AuthController authController,) async{
-    String otpPin = otpPinController.text;
-    // bool isVerified = await authController.verifyOtp(int.parse(otpPin), widget.verifyType);
-    // if(!isVerified){
-    //   onInvalidOtpEntered();
-    // }
-  }
-
-  _startListeningSms()  {
-    SmsVerification.startListeningSms().then((message) {
-      setState(() {
-        otpCode = SmsVerification.getCode(message, numberReg);
-        otpPinController.text = otpCode;
-        _otpVerified(Get.find<AuthController>());
-      });
-    });
+    if(widget.isFreeLancer){
+      await authController.registerFreeLancer(widget.registerFormData);
+    }else{
+      await authController.registerHirer(widget.registerFormData);
+    }
   }
 
   void onInvalidOtpEntered(){
-    errorController.add(ErrorAnimationType.shake);
-    showCustomSnackBar('Enter valid otp code to continue'.tr);
+    otpErrorText = ErrorMessage.enterValidCodeToContinue.tr;
+    setState(() {});
   }
 }

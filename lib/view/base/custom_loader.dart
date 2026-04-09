@@ -1,4 +1,4 @@
-import 'package:glow_solar/util/dimensions.dart';
+import 'package:jobreels/util/dimensions.dart';
 import 'package:flutter/material.dart';
 
 class CustomLoader extends StatelessWidget {

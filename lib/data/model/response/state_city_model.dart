@@ -1,12 +1,12 @@
-class State{
+class StateClass{
   final String stateName;
   final List<String> stateCities;
-  State({required this.stateName, required this.stateCities});
+  StateClass({required this.stateName, required this.stateCities});
 
-  factory State.fromJson(Map<String, dynamic>json){
-    return State(
+  factory StateClass.fromJson(Map<String, dynamic>json){
+    return StateClass(
       stateName: json['state'],
-      stateCities: List<Steing>.from(json['state']),
+      stateCities: List<String>.from(json['cities']).map((e) => e).toList(),
     );
   }
 }

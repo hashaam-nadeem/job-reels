@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/data/model/response/notification_model.dart';
-import 'package:glow_solar/view/screens/notification/widget/notification_item_widget.dart';
+import 'package:jobreels/data/model/response/notification_model.dart';
+import 'package:jobreels/view/screens/notification/widget/notification_item_widget.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../controller/notification_controller.dart';
+import '../../../controller/notification_chat_controller.dart';
 import '../../../controller/theme_controller.dart';
 import '../../../util/app_strings.dart';
 import '../../../util/dimensions.dart';
@@ -12,23 +12,21 @@ import '../../../util/styles.dart';
 import '../../base/custom_app_bar.dart';
 
 class NotificationScreen extends StatefulWidget {
-  final int isFromNotificationClick;
-   int ?notificationClickId;
-   NotificationScreen({Key? key, required this.isFromNotificationClick, required this.notificationClickId}) : super(key: key);
+   const NotificationScreen({Key? key,}) : super(key: key);
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
   late RefreshController _refreshController;
-  // bool isHighLightNotification = true;
 
   @override
   void initState() {
-    Get.find<NotificationController>().notificationCount;
-    _refreshController = RefreshController(initialRefresh: Get.find<NotificationController>().notificationList.isNotEmpty);
+    Get.find<ChatNotificationController>().setNotiMessageCounter(notiCounter: 0,isInit: true);
+    // Get.find<ChatNotificationController>().notificationCount;
+    _refreshController = RefreshController(initialRefresh: Get.find<ChatNotificationController>().notificationList.isNotEmpty);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Get.find<NotificationController>().fetchNotification();
+      Get.find<ChatNotificationController>().fetchNotification();
     });
     super.initState();
   }
@@ -36,14 +34,12 @@ class _NotificationScreenState extends State<NotificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: const CustomAppBar(title: AppString.notificationController, leading: null,showLeading: true,),
       body: SafeArea(
         child: Container(
           width : context.width,
-          height: context.height,
-          padding:  const EdgeInsets.all(Dimensions.PADDING_SIZE_SMALL),
+          padding:  const EdgeInsets.only(left: Dimensions.PADDING_SIZE_SMALL, right: Dimensions.PADDING_SIZE_SMALL, bottom: Dimensions.PADDING_SIZE_SMALL, ),
           margin: EdgeInsets.zero,
-          child:GetBuilder<NotificationController>(builder: (notificationController){
+          child:GetBuilder<ChatNotificationController>(builder: (notificationController){
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -53,17 +49,14 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     controller: _refreshController,
                     header: const MaterialClassicHeader(),
                     onRefresh: _onRefresh,
-                    child:(notificationController.isDataFetching && notificationController.notificationList.isEmpty)
-                        ? ListView(
-                      children: [
-                        notificationLoadingWidget(),
-                        notificationLoadingWidget(),
-                        notificationLoadingWidget(),
-                        notificationLoadingWidget(),
-                        notificationLoadingWidget(),
-                        notificationLoadingWidget(),
-                      ],
-                    )
+                    child: (notificationController.isDataFetching && notificationController.notificationList.isEmpty)
+                        ? ListView.builder(
+                            itemCount: context.height~/67,
+                            padding: const EdgeInsets.only(top: 10),
+                            itemBuilder: (BuildContext listContext, int index,){
+                              return notificationLoadingWidget();
+                            }
+                          )
                         : notificationController.notificationList.isEmpty
                         ? Column(
                       mainAxisSize: MainAxisSize.max,
@@ -77,19 +70,18 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       ],
                     )
                         : ListView.builder(
-                      itemCount: notificationController.notificationList.length,
-                      shrinkWrap: true,
-                      physics: const BouncingScrollPhysics(),
-                      itemBuilder: (BuildContext context, int index) {
-                        Notifications notification = notificationController.notificationList[index];
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          child: NotificationControllerItemWidget(
-                            notificationsId: notification.id,
+                            itemCount: notificationController.notificationList.length,
+                            shrinkWrap: true,
+                            itemBuilder: (BuildContext context, int index) {
+                              NotificationModel notification = notificationController.notificationList[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: NotificationControllerItemWidget(
+                                  notification: notification,
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ),
               ],
@@ -105,18 +97,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
       margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
         color: Theme.of(context).backgroundColor,
-        borderRadius: BorderRadius.circular(11),
       ),
-      height: 120,
+      height: 50,
       child: Shimmer.fromColors(
         period: const Duration(milliseconds: 1500),
         direction: ShimmerDirection.ltr,
-        baseColor: Get.find<ThemeController>().darkTheme==0? Theme.of(context).backgroundColor :Colors.grey.shade300,
-        highlightColor: Get.find<ThemeController>().darkTheme==0? Theme.of(context).scaffoldBackgroundColor : Colors.grey.shade100,
+        baseColor: Theme.of(context).primaryColorDark.withOpacity(0.3),
+        highlightColor: Theme.of(context).primaryColorDark.withOpacity(0.1),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).backgroundColor,
-            borderRadius: BorderRadius.circular(11),
+            color: Theme.of(context).primaryColorDark.withOpacity(0.3),
           ),
           padding: const EdgeInsets.only(left: 20,right: 20,top: 15,),
         ),
@@ -125,8 +115,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
   }
 
   void _onRefresh() async{
-    Get.find<NotificationController>().notificationCount;
-    await Get.find<NotificationController>().fetchNotification();
+    Get.find<ChatNotificationController>().notificationCount;
+    await Get.find<ChatNotificationController>().fetchNotification();
     _refreshController.refreshCompleted();
   }
 

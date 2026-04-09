@@ -1,5 +1,5 @@
 
-import 'package:glow_solar/util/app_constants.dart';
+import 'package:jobreels/util/app_constants.dart';
 import 'package:dio/dio.dart' as ApiClient;
 import '../api/Api_Handler/api_call_Structure.dart';
 import '../api/Api_Handler/api_constants.dart';

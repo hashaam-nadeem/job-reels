@@ -1,6 +1,4 @@
-enum TimeLine{
-  Day,
-  Week,
-  Month,
-  Year,
+enum ValidationType{
+  email,
+  phone
 }

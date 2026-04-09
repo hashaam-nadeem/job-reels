@@ -3,7 +3,7 @@ import '../data/api/Api_Handler/api_error_response.dart';
 import '../data/repository/stripe_repo.dart';
 import '../view/base/custom_snackbar.dart';
 import '../view/base/loading_widget.dart';
-import 'notification_controller.dart';
+import 'notification_chat_controller.dart';
 
 class StripeController extends GetxController implements GetxService {
   final StripeRepo stripeRepo;
@@ -18,7 +18,7 @@ class StripeController extends GetxController implements GetxService {
       String paymentToken = result['id'];
       response = await stripeRepo.paymentCharger(requestId: requestId, paymentToken: paymentToken, amount: amount, );
       if(response.containsKey(API_RESPONSE.SUCCESS)){
-        Get.find<NotificationController>().notificationPaymentStatus(id:notificationsId, zeroOne: 1 );
+        Get.find<ChatNotificationController>().notificationPaymentStatus(id:notificationsId, zeroOne: 1 );
         showCustomSnackBar(
           "Amount paid",
           isError: false,

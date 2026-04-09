@@ -1,11 +1,8 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:glow_solar/util/color_constants.dart';
-import 'package:glow_solar/util/dimensions.dart';
-import 'package:glow_solar/util/styles.dart';
+import 'package:jobreels/util/dimensions.dart';
+import 'package:jobreels/util/styles.dart';
 
 TextStyle postTextStyle({
   double fontSize = 15,
@@ -69,6 +66,7 @@ class CustomInputTextField extends StatefulWidget {
   final bool isPassword;
   final String? Function(String?)? validator;
   final String? Function(String?)? onValueChange;
+  final String? Function(String?)? onFieldSubmit;
   final List<TextInputFormatter> ?inputFormatters;
   final TextInputAction? textInputAction;
   final int ?minLines;
@@ -78,14 +76,19 @@ class CustomInputTextField extends StatefulWidget {
   final bool? obscureText;
   final Widget ? prefix;
   final Widget ? prefixIcon;
+  final bool showLabelText;
+  final double borderRadius;
+  final bool isNoBorderDecoration;
 
   const CustomInputTextField({
     Key? key,
     required this.controller,
     required this.focusNode,
     required this.context,
+    this.showLabelText = true,
     this.width,
     this.backgroundShadow,
+    this.onFieldSubmit,
     this.onTap,
     this.readOnly = false,
     this.labelText,
@@ -101,7 +104,9 @@ class CustomInputTextField extends StatefulWidget {
     this.onValueChange,
     this.hintText,
     this.prefixIcon,
+    this.isNoBorderDecoration = false,
     this.isPassword = false, this.obscureText,
+    this.borderRadius = Dimensions.BORDER_RADIUS,
   }) : super(key: key);
 
   @override
@@ -113,28 +118,45 @@ class _CustomInputTextFieldState extends State<CustomInputTextField> {
   Widget build(BuildContext context) {
     return SizedBox(
       width: widget.width??double.infinity,
-      child: TextFormField(
-        obscureText:widget.obscureText?? false,
-        controller: widget.controller,
-        focusNode: widget.focusNode,
-        readOnly: widget.readOnly,
-        keyboardType: widget.keyboardType,
-        inputFormatters: widget.inputFormatters,
-        textInputAction: widget.textInputAction,
-        textCapitalization: TextCapitalization.sentences,
-        onTap: widget.onTap!=null?(){
-          FocusScope.of(context).unfocus();
-          widget.onTap!();
-        }:null,
-        onChanged: widget.onValueChange,
-        maxLength: widget.maxTextLength,
-        minLines: widget.minLines,
-        maxLines: widget.maxLines,
-        autovalidateMode: AutovalidateMode.disabled,
-        validator: widget.validator,
-        style: montserratRegular.copyWith(fontSize: 16,),
-        enabled: !widget.readOnly,
-        decoration: inputDecoration(context: context,labelText: widget.labelText, suffixIcon: widget.suffixIcon, hintText: widget.hintText, prefix:widget.prefix,prefixIcon:widget.prefixIcon ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if(widget.labelText!=null && widget.showLabelText)
+            Text(
+              widget.labelText!,
+              style: montserratRegular.copyWith(fontSize: 16, color: Theme.of(context).primaryColor,),
+            ),
+          if(widget.labelText!=null && widget.showLabelText)
+            const SizedBox(height: 5,),
+    Theme(data: Theme.of(context).copyWith(
+        textSelectionTheme: TextSelectionThemeData(
+            selectionColor: Theme.of(context).secondaryHeaderColor)),
+            child: TextFormField(
+              obscureText:widget.obscureText?? false,
+              controller: widget.controller,
+              focusNode: widget.focusNode,
+              readOnly: widget.readOnly,
+              keyboardType: widget.keyboardType,
+              inputFormatters: widget.inputFormatters,
+              textInputAction: widget.textInputAction,
+              textCapitalization: TextCapitalization.sentences,
+              onTap: widget.onTap!=null?(){
+                FocusScope.of(context).unfocus();
+                widget.onTap!();
+              }:null,
+              onFieldSubmitted: widget.onFieldSubmit,
+              onChanged: widget.onValueChange,
+              maxLength: widget.maxTextLength,
+              minLines: widget.minLines,
+              maxLines: widget.maxLines,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: widget.validator,
+              style: montserratRegular.copyWith(fontSize: 16,),
+              enabled: !widget.readOnly,
+              decoration: inputDecoration(context: context,labelText: widget.labelText, suffixIcon: widget.suffixIcon, hintText: widget.hintText, prefix:widget.prefix,prefixIcon:widget.prefixIcon, backgroundColor: widget.backgroundShadow, borderRadius: widget.borderRadius, isNoBorderDecoration: widget.isNoBorderDecoration),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -143,33 +165,31 @@ TextInputType getKeyboardTypeForDigitsOnly(){
   return Platform.isIOS?TextInputType.datetime:TextInputType.number;
 }
 
-InputBorder inputFieldBorder(){
-  return OutlineInputBorder(
-    borderRadius: BorderRadius.circular(Dimensions.BORDER_RADIUS),
-    borderSide: const BorderSide(color: Colors.transparent),
+InputBorder inputFieldBorder(BuildContext context, double borderRadius, bool  isNoBorderDecoration){
+  return isNoBorderDecoration ? InputBorder.none : OutlineInputBorder(
+    borderRadius: BorderRadius.circular(borderRadius),
+    borderSide: BorderSide(color: Theme.of(context).primaryColor),
   );
 }
 
-InputDecoration inputDecoration({required BuildContext context, String ?labelText, Widget ?suffixIcon,Widget ?prefixIcon,String? hintText, Widget? prefix}){
+InputDecoration inputDecoration({required BuildContext context, String ?labelText, Widget ?suffixIcon,Widget ?prefixIcon,String? hintText, Widget? prefix, Color ?backgroundColor, required double borderRadius, bool isNoBorderDecoration = false}){
   return InputDecoration(
-
-    contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+    contentPadding: const EdgeInsets.all(10),
     filled: true,
-    fillColor:  Theme.of(context).backgroundColor,
-    errorMaxLines: 2,
-    errorStyle: montserratRegular.copyWith(color: AppColor.errorColor, fontSize: 11,),
+    fillColor: backgroundColor ?? Theme.of(context).primaryColorLight,
+    errorMaxLines: 3,
+    errorStyle: montserratRegular.copyWith(color: Theme.of(context).errorColor, fontSize: 14, fontStyle: FontStyle.italic,),
     floatingLabelStyle: montserratRegular.copyWith(fontSize: 14,color: Theme.of(context).primaryColor),
     counterStyle:  montserratRegular.copyWith(fontSize: 14,),
     labelStyle: montserratRegular.copyWith(color: Theme.of(context).hintColor),
-    labelText: labelText,
     suffixIcon: suffixIcon,
     suffixIconColor: Theme.of(context).hintColor,
-    disabledBorder: inputFieldBorder(),
-    enabledBorder: inputFieldBorder(),
-    border: inputFieldBorder(),
-    errorBorder: inputFieldBorder(),
-    focusedBorder: inputFieldBorder(),
-    focusedErrorBorder: inputFieldBorder(),
+    disabledBorder: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
+    enabledBorder: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
+    border: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
+    errorBorder: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
+    focusedBorder: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
+    focusedErrorBorder: inputFieldBorder(context, borderRadius, isNoBorderDecoration),
     hintText: hintText,
     prefix: prefix,
     prefixIcon: prefixIcon,

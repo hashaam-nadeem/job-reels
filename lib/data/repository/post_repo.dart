@@ -3,264 +3,128 @@ import 'package:get/get.dart';
 import 'package:jobreels/controller/auth_controller.dart';
 import 'package:jobreels/data/api/Api_Handler/api_call_Structure.dart';
 import 'package:jobreels/data/api/Api_Handler/api_constants.dart';
+import 'package:jobreels/data/model/body/post_upload.dart';
 import 'package:jobreels/data/model/response/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart' as ApiClient;
-import '../../enums/otp_verify_type.dart';
+import '../../enums/report_type.dart';
 import '../../util/app_constants.dart';
 
-class AuthRepo {
-  final SharedPreferences sharedPreferences;
-  AuthRepo({required this.sharedPreferences});
-
-  String? getAuthToken() {
-    return sharedPreferences.getString(AppConstants.AUTH_TOKEN_USER,);
-  }
-
-  // Future<Response> registration(SignUpBody signUpBody) async {
-  //   return await apiClient.postData(AppConstants.REGISTER_URI, signUpBody.toJson());
-  // }
-  //
-
-  void saveLoginUserData({required User user}){
-    sharedPreferences.setString(AppConstants.LOGIN_USER, json.encode(user.toJson()));
-  }
-
-  void setSharedPreferenceFcmToken({required String fcmToken}){
-    sharedPreferences.setString(AppConstants.FCM_TOKEN, fcmToken);
-  }
-  String? getFcmToken(){
-    return sharedPreferences.getString(AppConstants.FCM_TOKEN);
-  }
-
-  Future<Map<String,dynamic>> updateFcmToken({required String fcmToken})async{
+class PostRepo {
+  Future<Map<String, dynamic>> getPostList() async {
+    var userId = "0";
+    ;
+    if (Get.find<AuthController>().authRepo.isLoggedIn()) {
+      // Get.find<AuthController>().authRepo.getUserProfile();
+      User? user = Get.find<AuthController>().getLoginUserData();
+      if (user != null) {
+        userId = user.id.toString();
+      } else {}
+    }
+    print("now my url is: ${"${AppConstants.getPostList}?user_id=$userId"}");
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.UPDATE_FCM_TOKEN,
+      apiUrl: "${AppConstants.getPostList}?user_id=$userId",
       apiRequestMethod: API_REQUEST_METHOD.POST,
       isWantSuccessMessage: false,
-      body: ApiClient.FormData.fromMap({
-        "fcm_token": fcmToken,
-      }),
     );
-    return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: true);
+    return await apiObject.requestAPI(
+        isShowLoading: false, isCheckAuthorization: false);
   }
 
-  User ?getLoginUserData(){
-    String ?userData =  sharedPreferences.getString(AppConstants.LOGIN_USER,);
-    return userData!=null? User.fromJson(json.decode(userData)): null;
-  }
-
-
-  Future<Map<String, dynamic>> login({required String phoneNo,required String password,required String countryCode}) async {
-
+  Future<Map<String, dynamic>> getReportFlagList(Report type) async {
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.LOGIN,
+      apiUrl: type == Report.Post
+          ? AppConstants.reportPostFlags
+          : AppConstants.reportUserFlags,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(
+      isShowLoading: false,
+      isCheckAuthorization: false,
+    );
+  }
+
+  Future<Map<String, dynamic>> getSearchedPostList(String skill,
+      String availability, String experience, String searchText) async {
+    Map<String, dynamic> bodyParameters = {
+      'search': searchText,
+      'years_experience': experience,
+      'skills': skill,
+      'availablity': availability,
+    };
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.getSearchedPostList,
+      body: bodyParameters,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(
+        isShowLoading: false, isCheckAuthorization: false);
+  }
+
+  Future<Map<String, dynamic>> uploadVideo(PostForm postForm,
+      {bool isUpdate = false}) async {
+    ApiClient.FormData bodyParameters = await postForm.toApiBody();
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: isUpdate
+          ? "${AppConstants.updatePost}${postForm.postId}"
+          : AppConstants.uploadPost,
+      body: bodyParameters,
       apiRequestMethod: API_REQUEST_METHOD.POST,
       isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "contact_no": phoneNo,
-        "password": password,
-        "country_code": countryCode,
-      }),
     );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+    return await apiObject.requestAPI(
+        isShowLoading: false, isCheckAuthorization: true);
   }
 
-  Future<Map<String, dynamic>> verifyOtp({required int otpCode, required OtpVerifyType verifyType, int? userId}) async {
-
+  Future<Map<String, dynamic>> deleteVideo(int postId) async {
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: verifyType==OtpVerifyType.RegisterVerify? AppConstants.REGISTER_OTP_VERIFY: AppConstants.OTP_VERIFy,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
+      apiUrl: "${AppConstants.deletePost}$postId",
+      apiRequestMethod: API_REQUEST_METHOD.DELETE,
       isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "user_id": userId??getLoginUserData()?.id??0,
-        "code": otpCode,
-      }),
     );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+    return await apiObject.requestAPI(
+        isShowLoading: true, isCheckAuthorization: true);
   }
 
-  Future<Map<String, dynamic>> signUp({required String email,required String password, required String name,required String phoneNo,required String countryCode}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.SIGNUP,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "name":name,
-        "email": email,
-        "password": password,
-        "country_code": countryCode,
-        "contact_no": phoneNo,
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> changePassword({required String oldPassword,required String password}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.CHANGE_PASSWORD,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "old_password":oldPassword,
-        "new_password": password,
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> forgetPassword( {required String phoneNo,required String countryCode}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.FORGET,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "contact_no": phoneNo,
-        "country_code": countryCode,
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> resetPassword( {required String email, required String password,}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.RESET,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "email": email,
-        'password': password
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> logout() async {
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.LOGOUT,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "token_value": Get.find<AuthController>().getFcmToken(),
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-
-  // Future<Response> updateFcmToken() async {
-  //   String _deviceToken;
-  //   if (GetPlatform.isIOS && !GetPlatform.isWeb) {
-  //     FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
-  //     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-  //       alert: true, announcement: false, badge: true, carPlay: false,
-  //       criticalAlert: false, provisional: false, sound: true,
-  //     );
-  //     if(settings.authorizationStatus == AuthorizationStatus.authorized) {
-  //       _deviceToken = await _saveDeviceToken();
-  //     }
-  //   }else {
-  //     _deviceToken = await _saveDeviceToken();
-  //   }
-  //   if(!GetPlatform.isWeb) {
-  //     FirebaseMessaging.instance.subscribeToTopic(AppConstants.TOPIC);
-  //   }
-  //   return await apiClient.postData(AppConstants.TOKEN_URI, {"_method": "put", "cm_firebase_token": _deviceToken});
-  // }
-  //
-  // Future<String> _saveDeviceFcmToken() async {
-  //   String _deviceToken = '@';
-  //   if(!GetPlatform.isWeb) {
-  //     try {
-  //       _deviceToken = await FirebaseMessaging.instance.getToken();
-  //     }catch(e) {}
-  //   }
-  //   if (_deviceToken != null) {
-  //     print('--------Device Token---------- '+_deviceToken);
-  //   }
-  //   return _deviceToken;
-  // }
-
-  // Future<Response> forgetPassword(String phone) async {
-  //   return await apiClient.postData(AppConstants.FORGET_PASSWORD_URI, {"phone": phone});
-  // }
-
-  // Future<Response> verifyToken(String phone, String token) async {
-  //   return await apiClient.postData(AppConstants.VERIFY_TOKEN_URI, {"phone": phone, "reset_token": token});
-  // }
-
-  // Future<Response> resetPassword(String resetToken, String number, String password, String confirmPassword) async {
-  //   return await apiClient.postData(
-  //     AppConstants.RESET_PASSWORD_URI,
-  //     {"_method": "put", "reset_token": resetToken, "phone": number, "password": password, "confirm_password": confirmPassword},
-  //   );
-  // }
-
-  // Future<Response> checkEmail(String email) async {
-  //   return await apiClient.postData(AppConstants.CHECK_EMAIL_URI, {"email": email});
-  // }
-
-  // Future<Response> verifyEmail(String email, String token) async {
-  //   return await apiClient.postData(AppConstants.VERIFY_EMAIL_URI, {"email": email, "token": token});
-  // }
-
-  // Future<bool> saveUserToken(String token) async {
-  //   apiClient.token = token;
-  //   apiClient.updateHeader(
-  //     token, null, sharedPreferences.getString(AppConstants.LANGUAGE_CODE),
-  //     Get.find<SplashController>().module != null ? Get.find<SplashController>().module.id : null,
-  //   );
-  //   return await sharedPreferences.setString(AppConstants.TOKEN, token);
-  // }
-
-  bool isLoggedIn() {
-    return getLoginUserData()!=null;
-  }
-
-  bool clearSharedData() {
-    sharedPreferences.remove(AppConstants.LOGIN_USER);
-    sharedPreferences.clear();
-    return true;
-  }
-
-  Future<void> saveUserNumberAndPassword(String number, String password, String countryCode) async {
-    try {
-      await sharedPreferences.setString(AppConstants.USER_PASSWORD, password);
-      await sharedPreferences.setString(AppConstants.USER_NUMBER, number);
-      await sharedPreferences.setString(AppConstants.USER_COUNTRY_CODE, countryCode);
-    } catch (e) {
-      throw e;
+  Future<Map<String, dynamic>> reportVideo(
+      int id, int reportFlagId, String description,
+      {required Report reportType}) async {
+    Map<String, dynamic> body = {
+      "flag_id": reportFlagId,
+      "description": description,
+    };
+    if (reportType == Report.Post) {
+      body.addAll({
+        "post_id": id,
+      });
+    } else {
+      body.addAll({
+        "reported_user_id": id,
+      });
     }
+
+    ApiClient.FormData formData = ApiClient.FormData.fromMap(body);
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: reportType == Report.Post
+          ? AppConstants.reportPost
+          : AppConstants.reportUser,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      body: formData,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(
+        isShowLoading: true, isCheckAuthorization: true);
   }
 
-  String getUserPassword() {
-    return sharedPreferences.getString(AppConstants.USER_PASSWORD) ?? "";
-  }
-
-  bool isNotificationActive() {
-    return sharedPreferences.getBool(AppConstants.NOTIFICATION) ?? true;
-  }
-
-  // void setNotificationActive(bool isActive) {
-  //   // if(isActive) {
-  //   //   updateToken();
-  //   // }else {
-  //     if(!GetPlatform.isWeb) {
-  //       FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.TOPIC);
-  //       if(isLoggedIn()) {
-  //         FirebaseMessaging.instance.unsubscribeFromTopic('zone_${Get.find<LocationController>().getUserAddress().zoneId}_customer');
-  //       }
-  //     }
-  //   }
-  //   sharedPreferences.setBool(AppConstants.NOTIFICATION, isActive);
-
-  Future<bool> clearUserNumberAndPassword() async {
-    await sharedPreferences.remove(AppConstants.USER_PASSWORD);
-    await sharedPreferences.remove(AppConstants.USER_COUNTRY_CODE);
-    return await sharedPreferences.remove(AppConstants.USER_NUMBER);
+  Future<Map<String, dynamic>> bookmarkPost(int postId) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: "${AppConstants.bookmarkPost}$postId",
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(
+        isShowLoading: false, isCheckAuthorization: true);
   }
 }

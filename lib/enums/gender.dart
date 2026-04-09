@@ -1,6 +1,5 @@
-enum NotificationType{
-  ChargingRequestRejected,
-  ChargingRequest,
-  ChargingRequestPaymentSuccess,
-  ChargingRequestFree,
+enum Gender{
+  Male,
+  Female,
+  other,
 }

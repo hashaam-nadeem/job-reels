@@ -1,6 +1,5 @@
 
-enum OtpVerifyType{
-  ForgetPassword,
-  ChangePassword,
-  RegisterVerify,
+enum Report{
+  User,
+  Post
 }

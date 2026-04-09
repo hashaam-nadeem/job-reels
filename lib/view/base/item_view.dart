@@ -1,12 +1,12 @@
-// import 'package:glow_solar/helper/responsive_helper.dart';
-// import 'package:glow_solar/util/dimensions.dart';
-// import 'package:glow_solar/view/base/no_data_screen.dart';
-// import 'package:glow_solar/view/base/item_shimmer.dart';
-// import 'package:glow_solar/view/base/item_widget.dart';
-// import 'package:glow_solar/view/base/veg_filter_widget.dart';
+// import 'package:jobreels/helper/responsive_helper.dart';
+// import 'package:jobreels/util/dimensions.dart';
+// import 'package:jobreels/view/base/no_data_screen.dart';
+// import 'package:jobreels/view/base/item_shimmer.dart';
+// import 'package:jobreels/view/base/item_widget.dart';
+// import 'package:jobreels/view/base/veg_filter_widget.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:glow_solar/view/screens/home/theme1/store_widget.dart';
+// import 'package:jobreels/view/screens/home/theme1/store_widget.dart';
 //
 // class ItemsView extends StatelessWidget {
 //   final List<Item> items;

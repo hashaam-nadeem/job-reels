@@ -1,16 +1,16 @@
-// import 'package:glow_solar/helper/responsive_helper.dart';
-// import 'package:glow_solar/helper/route_helper.dart';
-// import 'package:glow_solar/util/styles.dart';
-// import 'package:glow_solar/view/base/custom_app_bar.dart';
-// import 'package:glow_solar/view/base/footer_view.dart';
-// import 'package:glow_solar/view/base/menu_drawer.dart';
-// import 'package:glow_solar/view/screens/language/widget/language_widget.dart';
+// import 'package:jobreels/helper/responsive_helper.dart';
+// import 'package:jobreels/helper/route_helper.dart';
+// import 'package:jobreels/util/styles.dart';
+// import 'package:jobreels/view/base/custom_app_bar.dart';
+// import 'package:jobreels/view/base/footer_view.dart';
+// import 'package:jobreels/view/base/menu_drawer.dart';
+// import 'package:jobreels/view/screens/language/widget/language_widget.dart';
 // import 'package:flutter/material.dart';
-// import 'package:glow_solar/util/app_constants.dart';
-// import 'package:glow_solar/util/dimensions.dart';
-// import 'package:glow_solar/util/images.dart';
-// import 'package:glow_solar/view/base/custom_button.dart';
-// import 'package:glow_solar/view/base/custom_snackbar.dart';
+// import 'package:jobreels/util/app_constants.dart';
+// import 'package:jobreels/util/dimensions.dart';
+// import 'package:jobreels/util/images.dart';
+// import 'package:jobreels/view/base/custom_button.dart';
+// import 'package:jobreels/view/base/custom_snackbar.dart';
 // import 'package:get/get.dart';
 //
 // class ChooseLanguageScreen extends StatefulWidget {

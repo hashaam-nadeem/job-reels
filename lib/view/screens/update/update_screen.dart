@@ -1,9 +1,9 @@
-// import 'package:glow_solar/controller/splash_controller.dart';
-// import 'package:glow_solar/util/dimensions.dart';
-// import 'package:glow_solar/util/images.dart';
-// import 'package:glow_solar/util/styles.dart';
-// import 'package:glow_solar/view/base/custom_button.dart';
-// import 'package:glow_solar/view/base/custom_snackbar.dart';
+// import 'package:jobreels/controller/splash_controller.dart';
+// import 'package:jobreels/util/dimensions.dart';
+// import 'package:jobreels/util/images.dart';
+// import 'package:jobreels/util/styles.dart';
+// import 'package:jobreels/view/base/custom_button.dart';
+// import 'package:jobreels/view/base/custom_snackbar.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:url_launcher/url_launcher_string.dart';

@@ -188,9 +188,6 @@ class SelectableLinkify extends StatelessWidget {
   /// Whether this text field should focus itself if nothing else is already focused.
   final bool autofocus;
 
-  /// Builds the text selection toolbar when requested by the user
-  final EditableTextContextMenuBuilder? contextMenuBuilder;
-
   /// How thick the cursor will be
   final double cursorWidth;
 
@@ -246,7 +243,6 @@ class SelectableLinkify extends StatelessWidget {
     this.strutStyle,
     this.showCursor = false,
     this.autofocus = false,
-    this.contextMenuBuilder,
     this.cursorWidth = 2.0,
     this.cursorRadius,
     this.cursorColor,
@@ -292,7 +288,6 @@ class SelectableLinkify extends StatelessWidget {
       showCursor: showCursor,
       textScaleFactor: textScaleFactor,
       autofocus: autofocus,
-      contextMenuBuilder: contextMenuBuilder,
       cursorWidth: cursorWidth,
       cursorRadius: cursorRadius,
       cursorColor: cursorColor,

@@ -1,6 +1,6 @@
-import 'package:glow_solar/util/color_constants.dart';
-import 'package:glow_solar/util/dimensions.dart';
-import 'package:glow_solar/util/styles.dart';
+import 'package:jobreels/util/color_constants.dart';
+import 'package:jobreels/util/dimensions.dart';
+import 'package:jobreels/util/styles.dart';
 import 'package:flutter/material.dart';
 
 class CustomButton extends StatelessWidget {
@@ -18,7 +18,7 @@ class CustomButton extends StatelessWidget {
   final Decoration? decoration;
   final Color? textColor;
   const CustomButton({Key? key, required this.onPressed, required this.buttonText, this.transparent = false, this.margin, this.width, this.height,
-    this.fontSize, this.radius = 5, this.icon, this.decoration, this.textColor, this.children, this.columnS}) : super(key: key);
+    this.fontSize, this.radius = 8, this.icon, this.decoration, this.textColor, this.children, this.columnS}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +26,8 @@ class CustomButton extends StatelessWidget {
     return Center(child: SizedBox(width: width ?? Dimensions.WEB_MAX_WIDTH, height: height, child: Container(
       padding: margin ?? const EdgeInsets.all(0),
       decoration: decoration ?? BoxDecoration(
-        border: Border.all(color: AppColor.primaryGradiantEnd),
-        borderRadius: BorderRadius.circular(radius), color: Theme.of(context).dialogBackgroundColor,
-        gradient: LinearGradient(colors: [AppColor.primaryGradiantStart, AppColor.primaryGradiantEnd]),
+        borderRadius: BorderRadius.circular(radius),
+        color: Theme.of(context).primaryColor,
       ),
       child: MaterialButton(
         onPressed: onPressed,

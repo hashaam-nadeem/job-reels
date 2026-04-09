@@ -1,70 +1,81 @@
-import 'package:glow_solar/data/model/response/car_model.dart';
-import 'package:glow_solar/data/model/response/charger_model.dart';
-import 'package:glow_solar/enums/time_line.dart';
-import 'package:glow_solar/util/images.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:jobreels/enums/validation_type.dart';
+import 'package:jobreels/util/images.dart';
+import 'package:jobreels/util/skill_constant.dart';
 import '../data/model/response/language_model.dart';
-import 'app_strings.dart';
+
+DefaultCacheManager cacheManager = DefaultCacheManager();
 
 class AppConstants {
-  static const String APP_NAME = 'Glow Solar';
+  static const String APP_NAME = 'JobReels';
   static const double APP_VERSION = 1.0;
   static const int PASSWORD_MIN_LENGTH = 6;
   static const int TEXT_FIELD_MAX_LENGTH = 250;
   static const int DIGIT_TEXT_FIELD_MAX_LENGTH = 4;
   static const double padding =20;
   static const double avatarRadius =35;
+  static const double cameraAspectRatio = 10/18.3;
 
   /// Api section
 
-  static const String BASE_URL = 'http://3.219.205.9';
-  // static const String BASE_URL = 'http://gahhak-stagging.link/solar-glow-backend-laravel';
-  static const String SMARTCAR_BASE_URL = 'https://connect.smartcar.com/';
-  static const String SMARTCAR_API_BASE_URL = 'https://api.smartcar.com/';
-  static const String AUTH_SMARTCAR_BASE_URL = 'https://auth.smartcar.com/';
-  static const String SOLAR_EDGE_BASE_URL = 'https://monitoringapi.solaredge.com/';
-  static const String SERVER_STORAGE_URL = '$BASE_URL/storage/app/public/';
-  static const String AUTH = '/api/auth/';
-  static const String SOLAR = '/api/solar/';
-  static const String CHARGER = '/api/charger/';
-  static const String CAR = '/api/car/';
+  static const String baseUrl = 'https://www.jobreels.app';
+  static const String api = '/api';
+  static const String getPostList = '$api/posts/list/guest';
+  static const String getSearchedPostList = '$api/post/search';
+  static const String user = '$api/user/';
+  static const String auth = user;
+  static String getUserProfile = user;
+  static String getOtherUserProfile = "${user}profile/";
+  static const String login = '${auth}login';
+  static const String reportPostFlags = '$api/flags';
+  static const String reportUserFlags = '$api/user-flags';
+  static const String logout = '${auth}logout';
+  static const String uploadPost = '$api/v1/post/create';
+  static const String updatePost = '$api/post/update/';
+  static const String deletePost = '$api/posts/';
+  static const String reportPost = '$api/post/flag';
+  static const String reportUser = '${user}flag';
+  static const String bookmarkPost = '$api/post/save/';
+  static const String getStates = '$api/states/list?country=';
+  static const String validatePhoneNumberOrEmail = '${user}data-validation';
+  static const String sendFreelancerOtp = '${user}registerFreelancerOtp';
+  static const String sendForgotPasswordOtp = '$api/forget-otp';
+  static const String resetPassword = '$api/forget-password';
+  static const String registerHirerOtp = '${user}registerHirerOtp';
+  static const String registerFreelancer = '${user}registerFreelancer';
+  static const String registerHirer = '${user}registerHirer';
+  static const String updateFreelancer = '${user}updateFreelancer';
+  static const String updateHirer = '${user}updateHirer';
+  static const String fetchNotificationList = '${user}notifications';
+  static const String updateFreelancerProfileImage = '${user}updateFreelancerProfileImage';
+  static const String sendDeleteAccountOtp = '${user}deleteAccountOtp';
+  static const String deleteAccount = '${user}deleteAccount';
+  static const String thread = '$api/thread/';
+  static const String fetchThreadId = '${thread}add';
+  static const String fetchThreadList = '${thread}list';
+  static const String fetchThreadMessages = '$api/message?thread_id=';
+
   static const String PASSWORD = '/api/password/';
   static const String REQUEST = '/api/charging-request/';
   static const String NOTIFICATIONS = '/api/notification/';
   static const String INVOICEHISTORY = '/api/payment-history/';
-  static const String LOGIN = '${AUTH}login';
-  static const String UPDATE_FCM_TOKEN = '${AUTH}add-fcm-token';
-  static const String SIGNUP = '${AUTH}signup';
-  static const String LOGOUT = '${AUTH}logout';
+
+  static const String UPDATE_FCM_TOKEN = '${auth}add-fcm-token';
+
   static const String FORGET = '${PASSWORD}forgot';
   static const String RESET = '${PASSWORD}reset';
   static const String CHANGE_PASSWORD = '${PASSWORD}change';
   static const String OTP_VERIFy = '/api/otp-code/verify';
-  static const String REGISTER_OTP_VERIFY = '${AUTH}verify';
-  static const String ADD_SOLAR = '${SOLAR}add';
-  static const String FETCH_SOLAR_LIST = '${SOLAR}list';
+  static const String REGISTER_OTP_VERIFY = '${auth}verify';
   static const String FETCH_SOLAR_PRODUCTION = 'site/';
   static const String FETCH_CHARGER_Api = 'https://fr.wydq.tech/weeyuen/api.php/interface';
   static const String FETCH_CHARGER_WITH_PILENO = '/realdata';
-  static const String UPDATE_SOLAR = '${SOLAR}update/';
-  static const String DELETE_SOLAR = '${SOLAR}delete/';
-  static const String ADD_CHARGER = '${CHARGER}add';
-  static const String FETCH_CHARGER_LIST = '${CHARGER}list';
-  static const String UPDATE_CHARGER = '${CHARGER}update/';
-  static const String UPDATE_IS_Active_CHARGER = '${CHARGER}update-is-active/';
-  static const String FETCH_FIND_CHARGER = '${CHARGER}find';
   static const String ADD_REQUEST_CHARGER = '${REQUEST}add';
   static const String FETCH_REQUEST_CHARGER = '${REQUEST}list';
   static const String STATUS_REQUEST_CHARGER = '${REQUEST}update-status';
-  static const String START_CHARGING = '${CHARGER}start-charging';
   static const String PAYMENT_CHARGER = '${REQUEST}charge-payment';
-  static const String FETCH_NOTIFICATION_LIST = '${NOTIFICATIONS}list';
   static const String FETCH_NOTIFICATION_COUNT = '${NOTIFICATIONS}count';
   static const String DELETE_NOTIFICATIONS = '${NOTIFICATIONS}delete/';
-  static const String ADD_CAR = '${CAR}add';
-  static const String FETCH_CAR_LIST = '${CAR}list';
-  static const String UPDATE_CAR = '${CAR}update/';
-  static const String DELETE_CAR = '${CAR}delete/';
-  static const String UPDATE_TOKEN = '${CAR}update-refresh-token';
   static const String INVOICE_LIST = '${INVOICEHISTORY}list';
   static const String HEADER = 'application/x-www-form-urlencoded;charset=utf-8';
   static const String STRIPE = 'https://api.stripe.com/v1/tokens';
@@ -80,6 +91,8 @@ class AppConstants {
 
   static const String THEME = 'GlowSolarTheme';
   static const String LOGIN_USER = 'LoginUser';
+  static const String SUBSCRIBED_USERS = 'SubscribedUsers';
+  static const String AUTH_TOKEN_USER = 'LoginUserAuthToken';
   static const String FCM_TOKEN = 'FcmToken';
   static const String DEFAULT_SOLAR_ID = 'defaultSolarId';
   static const String DEFAULT_CAR_ID = 'CarId';
@@ -116,9 +129,59 @@ class AppConstants {
 
 }
 
-const List<TimeLine> solarGraphTimeList= <TimeLine>[
-  TimeLine.Day,
-  TimeLine.Week,
-  TimeLine.Month,
-  TimeLine.Year,
+class Skill {
+  final String value;
+  final String label;
+  final String fullLabel;
+  final String category;
+
+  Skill({
+    required this.value,
+    required this.label,
+    required this.fullLabel,
+    required this.category,
+  });
+}
+
+List<String> availabilityFilterList = ["Any", "Full time", "Part time"];
+List<String> yearsOfExperienceList = [
+  "Less than 1 year",
+  "1-2 years",
+  // "2 years",
+  "3+ years",
+  // "4 years",
+  // "5 years",
+  // "More than 5 years",
 ];
+
+List<Skill>skillList = skillsMapList.map((skill) {
+    return Skill(
+      value: setCapitalizationOfString(skill['value']!),
+      label: setCapitalizationOfString(skill['label']!),
+      fullLabel: setCapitalizationOfString(skill['fullLabel']!),
+      category: setCapitalizationOfString(skill['category']!),
+    );
+  }).toList();
+
+String setCapitalizationOfString(String input){
+  return input[0].toUpperCase() + input.substring(1).toLowerCase();
+}
+
+
+List<String> howMuchExperienceDropDownList = <String>[
+  "Any",
+  "Less than 1 year",
+  "1-2 years",
+  "3+ years",
+];
+List<String> hirerIndustryList = <String>[
+  "Real Estate",
+  "Healthcare",
+  "Legal",
+  "Online Retailer",
+  "Financial",
+  "Coach",
+  "Sales / Marketing",
+  "Other",
+];
+

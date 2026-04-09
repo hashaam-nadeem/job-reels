@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/util/color_constants.dart';
+import 'package:jobreels/util/color_constants.dart';
+import 'package:jobreels/view/base/custom_loader.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class ApiLoader{
@@ -13,11 +14,7 @@ class ApiLoader{
         onWillPop: ()async{
           return false;
         },
-        child: LoadingAnimationWidget.flickr(
-          leftDotColor: Get.theme.primaryColor,
-          rightDotColor: AppColor.whiteColor,
-          size: 35,
-        ),
+        child: const CustomLoader(),
       ),
       barrierDismissible: false,
     );

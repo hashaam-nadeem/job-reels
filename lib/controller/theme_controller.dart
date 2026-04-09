@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/theme/dark_theme.dart';
-import 'package:glow_solar/theme/light_theme.dart';
+import 'package:jobreels/theme/dark_theme.dart';
+import 'package:jobreels/theme/light_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../util/app_constants.dart';
 
@@ -32,7 +32,6 @@ class ThemeController extends GetxController implements GetxService {
 
   void _loadCurrentTheme() async {
     _appTheme = (sharedPreferences.getInt(AppConstants.THEME) ?? 1);
-    debugPrint("_appTheme:-> $_appTheme");
     update();
   }
 

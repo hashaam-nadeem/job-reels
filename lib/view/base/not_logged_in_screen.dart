@@ -1,10 +1,10 @@
-// import 'package:glow_solar/helper/route_helper.dart';
-// import 'package:glow_solar/util/images.dart';
-// import 'package:glow_solar/util/styles.dart';
-// import 'package:glow_solar/view/base/custom_button.dart';
+// import 'package:jobreels/helper/route_helper.dart';
+// import 'package:jobreels/util/images.dart';
+// import 'package:jobreels/util/styles.dart';
+// import 'package:jobreels/view/base/custom_button.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:glow_solar/view/base/footer_view.dart';
+// import 'package:jobreels/view/base/footer_view.dart';
 //
 // class NotLoggedInScreen extends StatelessWidget {
 //   @override
@@ -38,7 +38,7 @@
 //             SizedBox(
 //               width: 200,
 //               child: CustomButton(buttonText: 'login_to_continue'.tr, height: 40, onPressed: () {
-//                 Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.main));
+//                 Get.toNamed(RouteHelper.getSignInRoute(RouteHelper.getMainScreenRoute()));
 //               }),
 //             ),
 //

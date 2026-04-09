@@ -1,5 +1,5 @@
-import 'package:glow_solar/util/images.dart';
-import 'package:glow_solar/util/styles.dart';
+import 'package:jobreels/util/images.dart';
+import 'package:jobreels/util/styles.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

@@ -1,10 +1,10 @@
-import 'package:glow_solar/controller/auth_controller.dart';
-import 'package:glow_solar/util/dimensions.dart';
-import 'package:glow_solar/view/base/custom_app_bar.dart';
-import 'package:glow_solar/view/base/custom_button.dart';
+import 'package:jobreels/controller/auth_controller.dart';
+import 'package:jobreels/util/dimensions.dart';
+import 'package:jobreels/view/base/custom_app_bar.dart';
+import 'package:jobreels/view/base/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/view/base/custom_snackbar.dart';
+import 'package:jobreels/view/base/custom_snackbar.dart';
 import '../../../util/app_constants.dart';
 import '../../../util/app_strings.dart';
 import '../../../util/styles.dart';

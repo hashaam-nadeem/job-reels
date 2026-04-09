@@ -1,8 +1,8 @@
-// import 'package:glow_solar/controller/localization_controller.dart';
-// import 'package:glow_solar/data/model/response/language_model.dart';
-// import 'package:glow_solar/util/app_constants.dart';
-// import 'package:glow_solar/util/dimensions.dart';
-// import 'package:glow_solar/util/styles.dart';
+// import 'package:jobreels/controller/localization_controller.dart';
+// import 'package:jobreels/data/model/response/language_model.dart';
+// import 'package:jobreels/util/app_constants.dart';
+// import 'package:jobreels/util/dimensions.dart';
+// import 'package:jobreels/util/styles.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 //

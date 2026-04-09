@@ -10,7 +10,6 @@ class AppColor{
   static Color greyColor = const Color(0x50F3F3F3);
   static Color textGreyColor = const Color(0x30000000);
   static Color primaryColorShade = const Color(0x11FFC700);
-  static Color errorColor = Colors.red;
   static Color labelColor = Colors.red.withOpacity(0.8);
   static Color weatherWidgetColor = const Color(0xff4BBEED);
   static Color borderColor = const Color(0xffE4AA38);

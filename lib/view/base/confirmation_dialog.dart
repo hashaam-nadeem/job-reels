@@ -1,7 +1,7 @@
-// import 'package:glow_solar/controller/order_controller.dart';
-// import 'package:glow_solar/util/dimensions.dart';
-// import 'package:glow_solar/util/styles.dart';
-// import 'package:glow_solar/view/base/custom_button.dart';
+// import 'package:jobreels/controller/order_controller.dart';
+// import 'package:jobreels/util/dimensions.dart';
+// import 'package:jobreels/util/styles.dart';
+// import 'package:jobreels/view/base/custom_button.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 //

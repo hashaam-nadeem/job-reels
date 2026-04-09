@@ -1,6 +1,6 @@
-// import 'package:glow_solar/data/api/api_client.dart';
-// import 'package:glow_solar/data/model/response/userinfo_model.dart';
-// import 'package:glow_solar/util/app_constants.dart';
+// import 'package:jobreels/data/api/api_client.dart';
+// import 'package:jobreels/data/model/response/user.dart';
+// import 'package:jobreels/util/app_constants.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:get/get_connect/http/src/response/response.dart';

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jobreels/controller/post_controller.dart';
+import 'package:jobreels/data/model/response/chat_thread_model.dart';
 import 'package:jobreels/data/model/response/notification_model.dart';
+import 'package:jobreels/view/screens/chat/widget/thread_item_widget.dart';
 import 'package:jobreels/view/screens/notification/widget/notification_item_widget.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:shimmer/shimmer.dart';
@@ -11,34 +14,52 @@ import '../../../util/dimensions.dart';
 import '../../../util/styles.dart';
 import '../../base/custom_app_bar.dart';
 
-class NotificationScreen extends StatefulWidget {
-   const NotificationScreen({Key? key,}) : super(key: key);
+class ThreadListScreen extends StatefulWidget {
+  final bool showAppBar;
+  const ThreadListScreen({Key? key, this.showAppBar = true}) : super(key: key);
   @override
-  State<NotificationScreen> createState() => _NotificationScreenState();
+  State<ThreadListScreen> createState() => _ThreadListScreenState();
 }
 
-class _NotificationScreenState extends State<NotificationScreen> {
+class _ThreadListScreenState extends State<ThreadListScreen> {
   late RefreshController _refreshController;
 
   @override
   void initState() {
-    Get.find<ChatNotificationController>().notificationCount;
-    _refreshController = RefreshController(initialRefresh: Get.find<ChatNotificationController>().notificationList.isNotEmpty);
+    // Get.find<ChatNotificationController>().setNotiMessageCounter(msgCounter: 0,isInit: true);
+    PostsController postsController = Get.find<PostsController>();
+    // if(postsController.totalPosts == 0 && !postsController.isApiCalledAtLeastOneTime){
+    postsController.getPosts().then((value) {
+      print("my value of sharing: ${value}");
+    });
+    _refreshController = RefreshController(
+        initialRefresh:
+            Get.find<ChatNotificationController>().chatThreadList.isNotEmpty);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Get.find<ChatNotificationController>().fetchNotification();
+      Get.find<ChatNotificationController>().fetchThreadList();
     });
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: widget.showAppBar
+          ? CustomAppBar(
+              title: AppString.messages,
+              leading: null,
+              showLeading: false,
+              titleColor: Theme.of(context).primaryColorLight,
+              tileColor: Theme.of(context).primaryColor,
+            )
+          : null,
       body: SafeArea(
         child: Container(
-          width : context.width,
-          padding:  const EdgeInsets.only(left: Dimensions.PADDING_SIZE_SMALL, right: Dimensions.PADDING_SIZE_SMALL, bottom: Dimensions.PADDING_SIZE_SMALL, ),
+          width: context.width,
           margin: EdgeInsets.zero,
-          child:GetBuilder<ChatNotificationController>(builder: (notificationController){
+          child: GetBuilder<ChatNotificationController>(
+              builder: (notificationController) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -48,39 +69,49 @@ class _NotificationScreenState extends State<NotificationScreen> {
                     controller: _refreshController,
                     header: const MaterialClassicHeader(),
                     onRefresh: _onRefresh,
-                    child: (notificationController.isDataFetching && notificationController.notificationList.isEmpty)
+                    child: (notificationController.isThreadFetchingData &&
+                            notificationController.chatThreadList.isEmpty)
                         ? ListView.builder(
-                            itemCount: context.height~/67,
+                            itemCount: context.height ~/ 67,
                             padding: const EdgeInsets.only(top: 10),
-                            itemBuilder: (BuildContext listContext, int index,){
+                            itemBuilder: (
+                              BuildContext listContext,
+                              int index,
+                            ) {
                               return notificationLoadingWidget();
-                            }
-                          )
-                        : notificationController.notificationList.isEmpty
-                        ? Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          AppString.noNotificationFound,
-                          textAlign: TextAlign.center,
-                          style: montserratMedium.copyWith(fontSize: 15),
-                        ),
-                      ],
-                    )
-                        : ListView.builder(
-                            itemCount: notificationController.notificationList.length,
-                            shrinkWrap: true,
-                            itemBuilder: (BuildContext context, int index) {
-                              NotificationModel notification = notificationController.notificationList[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
-                                child: NotificationControllerItemWidget(
-                                  notification: notification,
-                                ),
-                              );
-                            },
-                          ),
+                            })
+                        : notificationController.chatThreadList.isEmpty
+                            ? Column(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    AppString.noChatFound,
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        montserratMedium.copyWith(fontSize: 15),
+                                  ),
+                                ],
+                              )
+                            : ListView.builder(
+                                itemCount: notificationController
+                                    .chatThreadList.length,
+                                shrinkWrap: true,
+                                itemBuilder: (BuildContext context, int index) {
+                                  ChatThread thread = notificationController
+                                      .chatThreadList[index];
+
+                                  print("my unread count is: ${thread}");
+                                  return thread.lastMessage == null
+                                      ? Container(
+                                          height: 0,
+                                          width: 0,
+                                        )
+                                      : ThreadItemWidget(
+                                          thread: thread,
+                                        );
+                                },
+                              ),
                   ),
                 ),
               ],
@@ -91,7 +122,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     );
   }
 
-  Widget notificationLoadingWidget(){
+  Widget notificationLoadingWidget() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 5),
       decoration: BoxDecoration(
@@ -107,16 +138,23 @@ class _NotificationScreenState extends State<NotificationScreen> {
           decoration: BoxDecoration(
             color: Theme.of(context).primaryColorDark.withOpacity(0.3),
           ),
-          padding: const EdgeInsets.only(left: 20,right: 20,top: 15,),
+          padding: const EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 15,
+          ),
         ),
       ),
     );
   }
 
-  void _onRefresh() async{
-    Get.find<ChatNotificationController>().notificationCount;
-    await Get.find<ChatNotificationController>().fetchNotification();
+  void _onRefresh() async {
+    await Get.find<ChatNotificationController>().fetchThreadList();
+    PostsController postsController = Get.find<PostsController>();
+    // if(postsController.totalPosts == 0 && !postsController.isApiCalledAtLeastOneTime){
+    postsController.getPosts().then((value) {
+      print("my value of sharing: ${value}");
+    });
     _refreshController.refreshCompleted();
   }
-
 }

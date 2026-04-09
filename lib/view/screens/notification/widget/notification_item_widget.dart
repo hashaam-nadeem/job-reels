@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_font_icons/flutter_font_icons.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/data/model/response/notification_model.dart';
-import 'package:glow_solar/util/app_strings.dart';
+import 'package:jobreels/controller/post_controller.dart';
+import 'package:jobreels/data/model/response/notification_model.dart';
 import 'package:intl/intl.dart';
-import '../../../../controller/auth_controller.dart';
-import '../../../../controller/notification_controller.dart';
-import '../../../../helper/route_helper.dart';
-import '../../../../util/app_constants.dart';
-import '../../../../util/dimensions.dart';
+import 'package:jobreels/data/model/response/post.dart';
+import 'package:jobreels/helper/route_helper.dart';
+import 'package:jobreels/view/screens/home/home_screen.dart';
+import 'package:jobreels/view/screens/main/main_screen.dart';
 import '../../../../util/styles.dart';
-import '../../../base/custom_button.dart';
-import '../../charger controller/widgets/request_charger_item_widget.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 class NotificationControllerItemWidget extends StatefulWidget {
-  final int notificationsId;
-  const NotificationControllerItemWidget({Key? key, required this.notificationsId}) : super(key: key);
+  final NotificationModel notification;
+  const NotificationControllerItemWidget({Key? key, required this.notification}) : super(key: key);
   @override
   State<NotificationControllerItemWidget> createState() => _NotificationControllerItemWidgetState();
 }
@@ -25,124 +22,53 @@ class _NotificationControllerItemWidgetState extends State<NotificationControlle
   var formatter =  DateFormat.yMMMMd('en_US').add_jm();
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<NotificationController>(builder: (notificationController){
-      Notifications? notifications = notificationController.getNotificationWithId( id: widget.notificationsId);
-      return  GestureDetector(
-        onTap: notifications!=null?(){
-          showDetail(notifications);
-          notificationController.getNotificationReadStatus(status: true, id:notifications.id );
-        }:(){},
-        child: Slidable(
-          key: ValueKey(widget.notificationsId),
-          endActionPane: ActionPane(
-            motion: const ScrollMotion(),
-            dismissible: DismissiblePane(onDismissed: () {
-        notificationController.deleteSolar(id: widget.notificationsId);
-            }),
-            children:  [
-              SlidableAction(
-                backgroundColor: const Color(0xFFFE4B00),
-                foregroundColor: Colors.white,
-                icon: Icons.delete,
-                label: 'Delete',
-                borderRadius: BorderRadius.circular(11),
-                onPressed: (BuildContext context) {
-                  notificationController.deleteSolar(id: widget.notificationsId);
-                 // notificationController.removeNotification( id:widget.notificationsId,);
-                },
+    NotificationModel notification = widget.notification;
+    return GestureDetector(
+      onTap: (){
+        int initialPage = 0;
+        if(notification.type!="Approval"){
+          List<Post> postList = Get.find<PostsController>().postList;
+          if(postList.isNotEmpty){
+            initialPage = postList.indexWhere((post) => post.id == notification.postId);
+          }
+        }
+        homePageCurrentIndex = initialPage;
+        Get.offAllNamed(RouteHelper.getMainScreenRoute(homeInitialPage: initialPage));
+      },
+      child:Container(
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        width: context.width,
+        padding: const EdgeInsets.only(right: 5,top: 12,),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 30,
+              width: 30,
+              decoration: const BoxDecoration(
+                color: Color(0xFF067306),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
-          child: notifications!=null?Container(
-            margin: const EdgeInsets.symmetric(vertical: 5),
-            decoration: BoxDecoration(
-              // color: Theme.of(context).backgroundColor,
-              color: notifications.isRead
-                  ? Theme.of(context).backgroundColor
-                  : Theme.of(context).primaryColor.withOpacity(0.2) ,
-              borderRadius: BorderRadius.circular(11),
+              alignment: Alignment.center,
+              child: Icon(
+                Ionicons.notifications_outline,
+                size: 14,
+                color: Theme.of(context).primaryColorLight,
+              ),
             ),
-            padding: const EdgeInsets.only(left:10,right: 15,top: 12,),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                NotificationText(label: notifications.title, size: 16,fontWeight:FontWeight.w500,),
-                Row(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            NotificationText(label: "${AppString.chargingAmount}:",size: 12,color: Theme.of(context).primaryColorDark,),
-                            NotificationText(label: notifications.chargerRequest!.getPayment? "\$ ${notifications.chargerRequest!.amount}":"Free",size: 12,color: Theme.of(context).primaryColorDark.withOpacity(0.5),),
-                          ],
-                        ),
-                        NotificationText(label: getProductTime(notifications.time),size: 12,fontWeight:FontWeight.w400,),
-                        //NotificationText(label: DateFormat.yMMMMd('en_US').add_jm().format(DateTime.parse(notifications.time)),size: 12,fontWeight:FontWeight.w400,),
-                      ],
-                    ),
-                    const Spacer(),
-                    Get.find<AuthController>().isLoginUser(userId: notifications.chargerRequest!.user.id) && (notifications.chargerRequest!.getPayment && notifications.chargerRequest!.paymentStatus==0&&notifications.chargerRequest!.status==1)
-                        ? Padding(
-                      padding: const EdgeInsets.all(5.0),
-                      child: CustomButton(
-                        height: 40,
-                        width: 110,
-                        onPressed: () {
-                          Get.toNamed(RouteHelper.getPaymentRoute(notificationId: widget.notificationsId));
-                          notificationController.getNotificationReadStatus(status: true, id:notifications.id );
-                        },
-                        buttonText: "Pay now",
-                      ),
-                    ):const SizedBox()
-                  ],
-                ),
-                const SizedBox(height: Dimensions.PADDING_SIZE_EXTRA_SMALL,),
-              ],
+            const SizedBox(width: 10,),
+            Flexible(
+                child: Text(
+                  notification.notification,
+                  style: montserratSemiBold.copyWith(
+                    fontSize: 15,
+                  ),
+                )
             ),
-          ):const SizedBox(),
+          ],
         ),
-      );
-    });
-  }
-
-  void showDetail(Notifications notifications){
-    if(notifications.chargerRequest!=null){
-      /// Open Request Dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppConstants.padding),
-            ),
-            elevation: 0,
-            contentPadding: const EdgeInsets.all(0),
-            insetPadding: const EdgeInsets.all(0),
-            actionsPadding: const EdgeInsets.all(0),
-            buttonPadding: const EdgeInsets.all(0),
-            titlePadding: const EdgeInsets.symmetric(horizontal: Dimensions.PADDING_SIZE_DEFAULT),
-            backgroundColor: Colors.transparent,
-            title: Container(
-              decoration: BoxDecoration(
-                  shape: BoxShape.rectangle,
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(AppConstants.padding),
-                  boxShadow: const [
-                    BoxShadow(color: Colors.black, offset: Offset(0, 1), blurRadius: 6),
-                  ]
-              ),
-              child: RequestChargerItemWidget(
-                chargerRequest: notifications.chargerRequest!,
-                isFromDialog: true,
-              ),
-            ),
-          );
-        },
-      );
-    }
+      ),
+    );
   }
 
   String getProductTime(String notificationTime){

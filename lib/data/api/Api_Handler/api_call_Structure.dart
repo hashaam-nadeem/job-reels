@@ -3,16 +3,14 @@ import 'dart:io';
 import 'package:dio/dio.dart' as ApiClient;
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:glow_solar/controller/car_controller.dart';
-import 'package:glow_solar/data/api/api_checker.dart';
-import 'package:glow_solar/util/app_constants.dart';
-import 'package:glow_solar/util/app_credentials.dart';
-import 'package:glow_solar/util/app_strings.dart';
-import 'package:glow_solar/view/base/custom_snackbar.dart';
-import 'package:glow_solar/view/base/loading_widget.dart';
+import 'package:jobreels/data/api/api_checker.dart';
+import 'package:jobreels/util/app_constants.dart';
+import 'package:jobreels/util/app_credentials.dart';
+import 'package:jobreels/util/app_strings.dart';
+import 'package:jobreels/view/base/custom_snackbar.dart';
+import 'package:jobreels/view/base/loading_widget.dart';
 import '../../../controller/auth_controller.dart';
 import '../../../helper/route_helper.dart';
-import '../../model/response/car_model.dart';
 import 'api_constants.dart';
 import 'api_error_response.dart';
 
@@ -38,18 +36,20 @@ class API_STRUCTURE {
       ApiLoader.show();
     }
     try {
-      api = AppConstants.BASE_URL + apiUrl;
+      api = AppConstants.baseUrl + apiUrl;
       Map<String, String> header = {};
       if(contentType != null){
         header.addAll({
           "Content-Type": contentType!
         });
       }
+      print("bearer token: ${Get.find<AuthController>().authRepo.getAuthToken()}");
       if(Get.find<AuthController>().authRepo.isLoggedIn()){
         header.addAll({
-        "Authorization": "${Get.find<AuthController>().authRepo.getAuthTokenType()} ${Get.find<AuthController>().authRepo.getAuthToken()}"
+        "Authorization": "Bearer ${Get.find<AuthController>().authRepo.getAuthToken()}"
         });
       }
+
       header.addAll({
         "deviceType": Platform.isAndroid?'Android':"iOS",
         "Accept": "application/json",
@@ -59,10 +59,13 @@ class API_STRUCTURE {
         followRedirects: false,
         headers: header,
         /// Enable for testing complete status
-        // validateStatus: (int ?status){
-        //   return (status??500)<600;
-        // }
+        validateStatus: (int ?status){
+          return (status??500)<600;
+        }
       );
+      debugPrint("apiUrl:-> $api");
+      debugPrint("api request Type:-> $apiRequestMethod");
+      debugPrint("header:-> $header");
       ApiClient.Response<dynamic> response = apiRequestMethod == API_REQUEST_METHOD.GET
           ? await dio.get(api, options: options)
           : apiRequestMethod == API_REQUEST_METHOD.POST
@@ -70,19 +73,20 @@ class API_STRUCTURE {
               /// Else for Delete Method
               :  apiRequestMethod == API_REQUEST_METHOD.DELETE
           ? await dio.delete(api, options: options)
-      :await dio.put(api, data: body, options: options);
-      debugPrint('$api response:[${response.statusCode}]----> $response');
-      debugPrint('body  ${body?.fields}');
+      : await dio.put(api, data: body, options: options);
       if (isShowLoading){
         ApiLoader.hide();
       }
-      if(response.statusCode==200){
-        if(response.data["server_maintenance"] ?? false){
-          Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: false));
-          return  {API_RESPONSE.EXCEPTION: AppString.maintenance};
-        }else if(response.data["app_update"]??false){
-          Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: true));
-          return  {API_RESPONSE.EXCEPTION: AppString.updated};
+      debugPrint("api response:-> ${response.data}");
+      if(response.statusMessage?.toLowerCase()!='ok'){
+        if(response.statusCode==200){
+          if(response.data["server_maintenance"] ?? false){
+            Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: false));
+            return  {API_RESPONSE.EXCEPTION: AppString.maintenance};
+          }else if(response.data["app_update"]??false){
+            Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: true));
+            return  {API_RESPONSE.EXCEPTION: AppString.updated};
+          }
         }
       }
       if(isCheckAuthorization){
@@ -134,6 +138,7 @@ class API_STRUCTURE {
         e.message,
         isError: true,
       );
+      debugPrint("Exception type:-> ${e.type}\t${e.error}\t${e.message}");
       switch (e.type) {
         case ApiClient.DioErrorType.connectTimeout:
           exception =  {API_RESPONSE.EXCEPTION: "Connection timeout"};
@@ -145,7 +150,11 @@ class API_STRUCTURE {
           exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
           break;
         case ApiClient.DioErrorType.response:
-            exception =  {API_RESPONSE.EXCEPTION: "Server error"};
+          showCustomSnackBar(
+            "${e.response}",
+            isError: true,
+          );
+            exception =  {API_RESPONSE.EXCEPTION: "Something went wrong"};
           break;
         case ApiClient.DioErrorType.cancel:
           showCustomSnackBar(
@@ -183,548 +192,6 @@ class API_STRUCTURE {
     }
   }
 
-  Future<Map<String, dynamic>> smartCarAccessToken({bool isShowLoading = false,bool isCheckAuthorization=true}) async {
-    String api = "";
-    if(isShowLoading){
-      ApiLoader.show();
-    }
-    // try {
-      api = AppConstants.AUTH_SMARTCAR_BASE_URL + apiUrl;
-      Map<String, String> header = {};
-      if(contentType != null){
-        header.addAll({
-          "Content-Type": contentType!
-        });
-      }
-      if(Get.find<AuthController>().authRepo.isLoggedIn()){
-        header.addAll({
-          "Authorization": "Basic ezk1MzA0YjE3LTAzOGMtNDlmNS05NmUxLTJmMWI2NGZlMjMzMH06ezgwNmM4NjNmLTI2ODctNDM0Ny1iY2EzLWMzZjAyNzE3NjVhNH0="
-        });
-      }
-      // header.addAll({
-      //   "deviceType": Platform.isAndroid?'Android':"iOS",
-      //   "Accept": "application/json",
-      // });
-      ApiClient.Dio dio = ApiClient.Dio();
-      ApiClient.Options options = ApiClient.Options(
-          followRedirects: false,
-          headers: header,
-          /// Enable for testing complete status
-          validateStatus: (int ?status){
-            return (status??500)<600;
-          }
-      );
-      ApiClient.Response<dynamic> response = apiRequestMethod == API_REQUEST_METHOD.GET
-          ? await dio.get(api, options: options)
-          : apiRequestMethod == API_REQUEST_METHOD.POST
-          ? await dio.post(api, data: body, options: options)
-      /// Else for Delete Method
-          :  apiRequestMethod == API_REQUEST_METHOD.DELETE
-          ? await dio.delete(api, options: options)
-          :await dio.put(api, data: body, options: options);
-      debugPrint('$api response:[${response.statusCode}]----> $response');
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      if(response.statusCode==200){
-        if(response.data["server_maintenance"]??false){
-          Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: false));
-          return  {API_RESPONSE.EXCEPTION: AppString.maintenance};
-        }else if(response.data["app_update"]??false){
-          Get.offAllNamed(RouteHelper.getUpdateAndMaintenance(isUpdate: true));
-          return  {API_RESPONSE.EXCEPTION: AppString.updated};
-        }
-      }
-      if(isCheckAuthorization){
-        ApiChecker.checkUnAuthorization(response);
-      }
-      Map<String, dynamic> responseResult = {};
-      if(response.statusCode!=null){
-        responseResult = apiResponseHandling(response);
-      }else{
-        responseResult = {
-          API_RESPONSE.ERROR: "Something went wrong"
-        };
-      }
-      return responseResult;
-
-    // } on SocketException {
-    //   if (isShowLoading){
-    //     ApiLoader.hide();
-    //   }
-    //   showCustomSnackBar(
-    //     "Internet Connection Error",
-    //     isError: true,
-    //   );
-    //   return {API_RESPONSE.EXCEPTION: API_EXCEPTION.SOCKET};
-    // } on HttpException {
-    //   if (isShowLoading){
-    //     ApiLoader.hide();
-    //   }
-    //   showCustomSnackBar(
-    //     "Internet Connection Error",
-    //     isError: true,
-    //   );
-    //   return {API_RESPONSE.EXCEPTION: API_EXCEPTION.HTTP};
-    // } on FormatException {
-    //   if (isShowLoading){
-    //     ApiLoader.hide();
-    //   }
-    //   showCustomSnackBar(
-    //     "Server Bad response",
-    //     isError: true,
-    //   );
-    //   return {API_RESPONSE.EXCEPTION: API_EXCEPTION.FORMAT};
-    // } on ApiClient.DioError catch (e) {
-    //   Map<String, dynamic> exception={};
-    //   if (isShowLoading){
-    //     ApiLoader.hide();
-    //   }
-    //   showCustomSnackBar(
-    //     e.message,
-    //     isError: true,
-    //   );
-    //   switch (e.type) {
-    //     case ApiClient.DioErrorType.connectTimeout:
-    //       exception =  {API_RESPONSE.EXCEPTION: "Connection timeout"};
-    //       break;
-    //     case ApiClient.DioErrorType.sendTimeout:
-    //       exception =  {API_RESPONSE.EXCEPTION: "Sent timeout"};
-    //       break;
-    //     case ApiClient.DioErrorType.receiveTimeout:
-    //       exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
-    //       break;
-    //     case ApiClient.DioErrorType.response:
-    //       exception =  {API_RESPONSE.EXCEPTION: "Server error"};
-    //       break;
-    //     case ApiClient.DioErrorType.cancel:
-    //       showCustomSnackBar(
-    //         "Request cancelled",
-    //         isError: true,
-    //       );
-    //       exception =  {API_RESPONSE.EXCEPTION: "Cancel"};
-    //       break;
-    //     case
-    //     ApiClient.DioErrorType.other:
-    //       String error = e.error.toString().contains("SocketException")
-    //           ?"Internet Connection Error"
-    //           :API_EXCEPTION.UNKNOWN;
-    //       showCustomSnackBar(
-    //         error,
-    //         isError: true,
-    //       );
-    //       exception = {API_RESPONSE.EXCEPTION: error};
-    //       break;
-    //   }
-    //   return exception;
-    // } catch (error) {
-    //   if (isShowLoading){
-    //     ApiLoader.hide();
-    //   }
-    //   showCustomSnackBar(
-    //     error.toString().contains("SocketException")
-    //         ? "Internet Connection Error"
-    //         : error.toString(),
-    //     isError: true,
-    //   );
-    //   return error.toString().contains("SocketException")
-    //       ? {API_RESPONSE.EXCEPTION: "Internet Connection Error"}
-    //       : {API_RESPONSE.EXCEPTION: API_EXCEPTION.UNKNOWN};
-    // }
-  }
-
-  Future<Map<String, dynamic>> smartCarRequestAPI({required String accessToken, bool isShowLoading = false,bool isCheckAuthorization=true,}) async {
-    String api = "";
-    if(isShowLoading){
-      ApiLoader.show();
-    }
-    try {
-      api = AppConstants.SMARTCAR_API_BASE_URL + apiUrl;
-      Map<String, String> header = {};
-
-      if(contentType != null){
-        header.addAll({
-          //"Content-Type": "application/x-www-form-urlencoded"
-        });
-      }
-      header.addAll({
-        "Authorization": "Bearer $accessToken "
-      });
-      ApiClient.Dio dio = ApiClient.Dio();
-      ApiClient.Options options = ApiClient.Options(
-          followRedirects: false,
-          headers: header,
-          contentType:contentType??"application/json",
-          /// Enable for testing complete status
-          validateStatus: (int ?status){
-            return (status??500)<600;
-          }
-      );
-      ApiClient.Response<dynamic> response = apiRequestMethod == API_REQUEST_METHOD.GET
-          ? await dio.get(api, options: options,)
-          : apiRequestMethod == API_REQUEST_METHOD.POST
-          ? await dio.post(api, data: body, options: options, )
-      /// Else for Delete Method
-          :  apiRequestMethod == API_REQUEST_METHOD.DELETE
-          ? await dio.delete(api, options: options)
-          :await dio.put(api, data: body, options: options);
-      debugPrint('$api response:[${response.statusCode}]----> $response');
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      if(isCheckAuthorization){
-        //ApiChecker.checkUnAuthorization(response);
-      }
-      Map<String, dynamic> responseResult = {};
-      if(response.statusCode!=null){
-        responseResult = smartCarApiResponseHandling(response:response,);
-      }else{
-        responseResult = {
-          API_RESPONSE.ERROR: "Something went wrong"
-        };
-      }
-      return responseResult;
-
-    } on SocketException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      // showCustomSnackBar(
-      //   "Internet Connection Error",
-      //   isError: true,
-      // );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.SOCKET};
-    } on HttpException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      // showCustomSnackBar(
-      //   "Internet Connection Error",
-      //   isError: true,
-      // );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.HTTP};
-    } on FormatException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      // showCustomSnackBar(
-      //   "Server Bad response",
-      //   isError: true,
-      // );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.FORMAT};
-    } on ApiClient.DioError catch (e) {
-      Map<String, dynamic> exception={};
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      // showCustomSnackBar(
-      //   e.message,
-      //   isError: true,
-      // );
-      switch (e.type) {
-        case ApiClient.DioErrorType.connectTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Connection timeout"};
-          break;
-        case ApiClient.DioErrorType.sendTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Sent timeout"};
-          break;
-        case ApiClient.DioErrorType.receiveTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
-          break;
-        case ApiClient.DioErrorType.response:
-          exception =  {API_RESPONSE.EXCEPTION: "Server error"};
-          break;
-        case ApiClient.DioErrorType.cancel:
-        // showCustomSnackBar(
-        //   "Request cancelled",
-        //   isError: true,
-        // );
-          exception =  {API_RESPONSE.EXCEPTION: "Cancel"};
-          break;
-        case
-        ApiClient.DioErrorType.other:
-          String error = e.error.toString().contains("SocketException")
-              ?"Internet Connection Error"
-              :API_EXCEPTION.UNKNOWN;
-          // showCustomSnackBar(
-          //   error,
-          //   isError: true,
-          // );
-          exception = {API_RESPONSE.EXCEPTION: error};
-          break;
-      }
-      return exception;
-    } catch (error) {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      // showCustomSnackBar(
-      //   error.toString().contains("SocketException")
-      //       ? "Internet Connection Error"
-      //       : error.toString(),
-      //   isError: true,
-      // );
-      return error.toString().contains("SocketException")
-          ? {API_RESPONSE.EXCEPTION: "Internet Connection Error"}
-          : {API_RESPONSE.EXCEPTION: API_EXCEPTION.UNKNOWN};
-    }
-  }
-
-  Future<Map<String, dynamic>> requestChargerAPI({bool isShowLoading = false,}) async {
-    String api = "";
-    if(isShowLoading){
-      ApiLoader.show();
-    }
-
-    try {
-      api = AppConstants.FETCH_CHARGER_Api + apiUrl;
-      Map<String, String> header = {};
-        header.addAll({
-          "Content-Type": "application/x-www-form-urlencoded;charset=utf-8"
-        });
-
-      ApiClient.Dio dio = ApiClient.Dio();
-      ApiClient.Options options = ApiClient.Options(
-        followRedirects: false,
-        headers: header,
-        /// Enable for testing complete status
-        // validateStatus: (int ?status){
-        //   return (status??500)<600;
-        // }
-      );
-      debugPrint("api:-> $api");
-      debugPrint("body:-> ${body.fields}");
-      ApiClient.Response<dynamic> response = apiRequestMethod == API_REQUEST_METHOD.GET
-          ? await dio.get(api, options: options)
-          : apiRequestMethod == API_REQUEST_METHOD.POST
-          ? await dio.post(api, data: body, options: options)
-      /// Else for Delete Method
-          :  apiRequestMethod == API_REQUEST_METHOD.DELETE
-          ? await dio.delete(api, options: options)
-          :await dio.put(api, data: body, options: options);
-      debugPrint('response----> $response');
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      Map<String, dynamic> responseResult = {};
-      if(response.statusCode!=null){
-        responseResult = chargerResponseHandling(response);
-      }else{
-        responseResult = {
-          API_RESPONSE.ERROR: "Something went wrong"
-        };
-      }
-      return responseResult;
-
-    } on SocketException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Internet Connection Error",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.SOCKET};
-    } on HttpException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Internet Connection Error",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.HTTP};
-    } on FormatException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Server Bad response",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.FORMAT};
-    } on ApiClient.DioError catch (e) {
-      Map<String, dynamic> exception={};
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        e.message,
-        isError: true,
-      );
-      switch (e.type) {
-        case ApiClient.DioErrorType.connectTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Connection timeout"};
-          break;
-        case ApiClient.DioErrorType.sendTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Sent timeout"};
-          break;
-        case ApiClient.DioErrorType.receiveTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
-          break;
-        case ApiClient.DioErrorType.response:
-          exception =  {API_RESPONSE.EXCEPTION: "Server error"};
-          break;
-        case ApiClient.DioErrorType.cancel:
-          showCustomSnackBar(
-            "Request cancelled",
-            isError: true,
-          );
-          exception =  {API_RESPONSE.EXCEPTION: "Cancel"};
-          break;
-        case
-        ApiClient.DioErrorType.other:
-          String error = e.error.toString().contains("SocketException")
-              ?"Internet Connection Error"
-              :API_EXCEPTION.UNKNOWN;
-          showCustomSnackBar(
-            error,
-            isError: true,
-          );
-          exception = {API_RESPONSE.EXCEPTION: error};
-          break;
-      }
-      return exception;
-    } catch (error) {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        error.toString().contains("SocketException")
-            ? "Internet Connection Error"
-            : error.toString(),
-        isError: true,
-      );
-      return error.toString().contains("SocketException")
-          ? {API_RESPONSE.EXCEPTION: "Internet Connection Error"}
-          : {API_RESPONSE.EXCEPTION: API_EXCEPTION.UNKNOWN};
-    }
-  }
-
-  Future<Map<String, dynamic>> requestSolarEdgeAPI({bool isShowLoading = false,}) async {
-    String api = "";
-    if(isShowLoading){
-      ApiLoader.show();
-    }
-
-    try {
-      api = AppConstants.SOLAR_EDGE_BASE_URL + apiUrl;
-      ApiClient.Dio dio = ApiClient.Dio();
-      ApiClient.Options options = ApiClient.Options(
-          followRedirects: false,
-          /// Enable for testing complete status
-          validateStatus: (int ?status){
-            return (status??500)<500;
-          }
-      );
-      debugPrint("api:-> $api");
-      ApiClient.Response<dynamic> response = apiRequestMethod == API_REQUEST_METHOD.GET
-          ? await dio.get(api, options: options)
-          : apiRequestMethod == API_REQUEST_METHOD.POST
-          ? await dio.post(api, data: body, options: options)
-      /// Else for Delete Method
-          :  apiRequestMethod == API_REQUEST_METHOD.DELETE
-          ? await dio.delete(api, options: options)
-          :await dio.put(api, data: body, options: options);
-      debugPrint('response----> $response');
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      Map<String, dynamic> responseResult = {};
-      if(response.statusCode!=null){
-        responseResult = solarEdgeApiResponseHandling(response);
-      }else{
-        responseResult = {
-          API_RESPONSE.ERROR: "Something went wrong"
-        };
-      }
-      return responseResult;
-
-    } on SocketException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Internet Connection Error",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.SOCKET};
-    } on HttpException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Internet Connection Error",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.HTTP};
-    } on FormatException {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        "Server Bad response",
-        isError: true,
-      );
-      return {API_RESPONSE.EXCEPTION: API_EXCEPTION.FORMAT};
-    } on ApiClient.DioError catch (e) {
-      Map<String, dynamic> exception={};
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        e.message,
-        isError: true,
-      );
-      switch (e.type) {
-        case ApiClient.DioErrorType.connectTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Connection timeout"};
-          break;
-        case ApiClient.DioErrorType.sendTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Sent timeout"};
-          break;
-        case ApiClient.DioErrorType.receiveTimeout:
-          exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
-          break;
-        case ApiClient.DioErrorType.response:
-          exception =  {API_RESPONSE.EXCEPTION: "Server error"};
-          break;
-        case ApiClient.DioErrorType.cancel:
-          showCustomSnackBar(
-            "Request cancelled",
-            isError: true,
-          );
-          exception =  {API_RESPONSE.EXCEPTION: "Cancel"};
-          break;
-        case
-        ApiClient.DioErrorType.other:
-          String error = e.error.toString().contains("SocketException")
-              ?"Internet Connection Error"
-              :API_EXCEPTION.UNKNOWN;
-          showCustomSnackBar(
-            error,
-            isError: true,
-          );
-          exception = {API_RESPONSE.EXCEPTION: error};
-          break;
-      }
-      return exception;
-    } catch (error) {
-      if (isShowLoading){
-        ApiLoader.hide();
-      }
-      showCustomSnackBar(
-        error.toString().contains("SocketException")
-            ? "Internet Connection Error"
-            : error.toString(),
-        isError: true,
-      );
-      return error.toString().contains("SocketException")
-          ? {API_RESPONSE.EXCEPTION: "Internet Connection Error"}
-          : {API_RESPONSE.EXCEPTION: API_EXCEPTION.UNKNOWN};
-    }
-  }
-
   Future<Map<String, dynamic>> requestCustomAPI({bool isShowLoading = false,}) async {
     if(isShowLoading){
       ApiLoader.show();
@@ -738,7 +205,7 @@ class API_STRUCTURE {
       }
       if(Get.find<AuthController>().authRepo.isLoggedIn()){
         header.addAll({
-          "Authorization": "${Get.find<AuthController>().authRepo.getAuthTokenType()} ${Get.find<AuthController>().authRepo.getAuthToken()}"
+          "Authorization": "Bearer ${Get.find<AuthController>().authRepo.getAuthToken()}"
         });
       }
       header.addAll({
@@ -746,6 +213,7 @@ class API_STRUCTURE {
         "Accept": "application/json",
       });
       debugPrint("api:-> $apiUrl");
+      debugPrint("request Type:-> $apiRequestMethod");
       debugPrint("body:-> $body");
       debugPrint("header:-> $header");
       ApiClient.Dio dio = ApiClient.Dio();
@@ -824,7 +292,7 @@ class API_STRUCTURE {
           exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
           break;
         case ApiClient.DioErrorType.response:
-          exception =  {API_RESPONSE.EXCEPTION: "Server error"};
+          exception =  {API_RESPONSE.EXCEPTION: "Something went wrong"};
           break;
         case ApiClient.DioErrorType.cancel:
           showCustomSnackBar(
@@ -901,7 +369,7 @@ class API_STRUCTURE {
       }
       Map<String, dynamic> responseResult = {};
       if(response.statusCode!=null){
-        responseResult = solarEdgeApiResponseHandling(response);
+        responseResult = customApiResponseHandling(response);
       }else{
         responseResult = {
           API_RESPONSE.ERROR: "Something went wrong"
@@ -956,7 +424,7 @@ class API_STRUCTURE {
           exception =  {API_RESPONSE.EXCEPTION: "Receive timeout"};
           break;
         case ApiClient.DioErrorType.response:
-          exception =  {API_RESPONSE.EXCEPTION: "Server error"};
+          exception =  {API_RESPONSE.EXCEPTION: "Something went wrong"};
           break;
         case ApiClient.DioErrorType.cancel:
           showCustomSnackBar(
@@ -997,13 +465,15 @@ class API_STRUCTURE {
   apiResponseHandling(ApiClient.Response response) {
     if (response.statusCode! >= 200 && response.statusCode !< 220) {
       if (isWantSuccessMessage) {
-        // showCustomSnackBar(
-        //   response.data["message"],
-        //isError: false,
-        // );
+        debugPrint("response:-> ${response}");
+        showCustomSnackBar(
+          response.data["message"],
+          isError: false,
+        );
       }
       return {API_RESPONSE.SUCCESS: response.data};
     } else {
+      debugPrint("response:-> ${response.data}");
       String error='';
       try{
         showCustomSnackBar(
@@ -1013,12 +483,12 @@ class API_STRUCTURE {
       }catch(e){
         debugPrint("Exception:-> $e");
       }
-      error = API_RESPONSE.GetErrorResponse(response.statusCode!) ?? "Unknown Status Response";
-      return {API_RESPONSE.ERROR: error};
+      // error = API_RESPONSE.GetErrorResponse(response.statusCode!) ?? "Unknown Status Response";
+      return {API_RESPONSE.ERROR: response.data};
     }
   }
 
-  solarEdgeApiResponseHandling(ApiClient.Response response) {
+  customApiResponseHandling(ApiClient.Response response) {
     if (response.statusCode! >= 200 && response.statusCode !< 220) {
       if (isWantSuccessMessage) {
         // showCustomSnackBar(
@@ -1042,42 +512,6 @@ class API_STRUCTURE {
         isError: true,
       );
       return {API_RESPONSE.ERROR: error};
-    }
-  }
-
-  chargerResponseHandling(ApiClient.Response response) {
-    debugPrint("data:-> ${response.data}");
-    if (jsonDecode(response.data)["code"] == "1") {
-      if (isWantSuccessMessage) {
-        // showCustomSnackBar(
-        //   jsonDecode(response.data)["msg"],
-        //   isError: false,
-        // );
-      }
-      return {API_RESPONSE.SUCCESS: response.data};
-    } else {
-      String error = jsonDecode(response.data)["msg"];
-      showCustomSnackBar(
-        error,
-        isError: true,
-      );
-      return {API_RESPONSE.ERROR: error};
-    }
-  }
-
-  smartCarApiResponseHandling({required ApiClient.Response response,}) {
-    if (response.statusCode! >= 200 && response.statusCode !< 220) {
-      if (isWantSuccessMessage) {
-        // showCustomSnackBar(
-        //   response.data["message"],
-        //isError: false,
-        // );
-      }
-      return {API_RESPONSE.SUCCESS: response.data};
-    }  else{
-
-      // error = API_RESPONSE.GetErrorResponse(response.statusCode!) ?? "Unknown Status Response";
-      //return {API_RESPONSE.ERROR: error};
     }
   }
 

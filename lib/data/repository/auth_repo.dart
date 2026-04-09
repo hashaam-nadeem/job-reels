@@ -1,16 +1,16 @@
 import 'dart:convert';
-
-import 'package:dio/dio.dart';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/response/response.dart';
-import 'package:glow_solar/controller/auth_controller.dart';
-import 'package:glow_solar/data/api/Api_Handler/api_call_Structure.dart';
-import 'package:glow_solar/data/api/Api_Handler/api_constants.dart';
-import 'package:glow_solar/data/model/response/userinfo_model.dart';
+import 'package:jobreels/controller/auth_controller.dart';
+import 'package:jobreels/data/api/Api_Handler/api_call_Structure.dart';
+import 'package:jobreels/data/api/Api_Handler/api_constants.dart';
+import 'package:jobreels/data/model/response/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart' as ApiClient;
-import '../../enums/otp_verify_type.dart';
-import '../../helper/route_helper.dart';
+import '../../enums/report_type.dart';
+import '../../enums/validation_type.dart';
 import '../../util/app_constants.dart';
 
 class AuthRepo {
@@ -18,12 +18,10 @@ class AuthRepo {
   AuthRepo({required this.sharedPreferences});
 
   String? getAuthToken() {
-    UserInfoModel ?userInfo = getLoginUserData();
-    return userInfo?.accessToken;
+    return sharedPreferences.getString(AppConstants.AUTH_TOKEN_USER,);
   }
-  String? getAuthTokenType() {
-    UserInfoModel ?userInfo = getLoginUserData();
-    return userInfo?.tokenType;
+  void saveAuthToken(String authToken) async{
+    sharedPreferences.setString(AppConstants.AUTH_TOKEN_USER,authToken);
   }
 
   // Future<Response> registration(SignUpBody signUpBody) async {
@@ -31,7 +29,7 @@ class AuthRepo {
   // }
   //
 
-  void saveLoginUserData({required UserInfoModel user}){
+  void saveLoginUserData({required User user}){
     sharedPreferences.setString(AppConstants.LOGIN_USER, json.encode(user.toJson()));
   }
 
@@ -54,53 +52,93 @@ class AuthRepo {
     return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: true);
   }
 
-  UserInfoModel ?getLoginUserData(){
+  void subscribeUser(int userId){
+    List<int>subscribedUsersList =  getSubscribedUsers;
+    debugPrint("before subscribe subscribedUsersList:->> ${subscribedUsersList.length}");
+    if(!subscribedUsersList.contains(userId)){
+      subscribedUsersList.add(userId);
+    }
+    debugPrint("after subscribe subscribedUsersList:->> ${subscribedUsersList.length}");
+    sharedPreferences.setStringList(AppConstants.SUBSCRIBED_USERS, subscribedUsersList.map((e) => e.toString()).toList());
+  }
+
+  void cancelUserSubscription(int userId){
+    List<int>subscribedUsersList =  getSubscribedUsers;
+    subscribedUsersList.remove(userId);
+    User ?user = getLoginUserData();
+    if(user!=null){
+      user.isSubscribed = false;
+      saveLoginUserData(user: user);
+    }
+    sharedPreferences.setStringList(AppConstants.SUBSCRIBED_USERS, subscribedUsersList.map((e) => e.toString()).toList());
+  }
+
+   List<int> get getSubscribedUsers => sharedPreferences.getStringList(AppConstants.SUBSCRIBED_USERS)?.map((e) => int.parse(e)).toList()??[];
+
+  User ?getLoginUserData(){
     String ?userData =  sharedPreferences.getString(AppConstants.LOGIN_USER,);
-    return userData!=null? UserInfoModel.fromJson(json.decode(userData)): null;
+    return userData!=null? User.fromJson(json.decode(userData)): null;
   }
 
-  Future<Map<String, dynamic>> login({required String phoneNo,required String password,required String countryCode}) async {
 
+  Future<Map<String, dynamic>> login({required String email,required String password,}) async {
+    String ?fcmToken;
+    if(Platform.isAndroid){
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    }else if(Platform.isIOS){
+      await FirebaseMessaging.instance.getAPNSToken();
+      fcmToken =  await FirebaseMessaging.instance.getToken();
+    }
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.LOGIN,
+      apiUrl: AppConstants.login,
       apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
+      isWantSuccessMessage: false,
       body: ApiClient.FormData.fromMap({
-        "contact_no": phoneNo,
-        "password": password,
-        "country_code": countryCode,
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> verifyOtp({required int otpCode, required OtpVerifyType verifyType, int? userId}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: verifyType==OtpVerifyType.RegisterVerify? AppConstants.REGISTER_OTP_VERIFY: AppConstants.OTP_VERIFy,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "user_id": userId??getLoginUserData()?.id??0,
-        "code": otpCode,
-      }),
-    );
-    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
-  }
-
-  Future<Map<String, dynamic>> signUp({required String email,required String password, required String name,required String phoneNo,required String countryCode}) async {
-
-    API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.SIGNUP,
-      apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "name":name,
         "email": email,
         "password": password,
-        "country_code": countryCode,
-        "contact_no": phoneNo,
+        'FCMToken': fcmToken,
       }),
+    );
+    return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: false);
+  }
+
+  Future<Map<String, dynamic>> getUserProfile() async {
+    print("get user profile url: ${AppConstants.getUserProfile}");
+    print("base url : ${AppConstants.baseUrl}");
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.getUserProfile,
+      apiRequestMethod: API_REQUEST_METHOD.GET,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: false);
+  }
+
+  Future<Map<String, dynamic>> getOtherUserProfile(int userId) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: "${AppConstants.getOtherUserProfile}$userId",
+      apiRequestMethod: API_REQUEST_METHOD.GET,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: false);
+  }
+
+  Future<Map<String, dynamic>> registerFreeLancer({required ApiClient.FormData formData}) async {
+
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.registerFreelancer,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+      body: formData,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
+  Future<Map<String, dynamic>> registerHirer({required ApiClient.FormData formData}) async {
+
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.registerHirer,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+      body: formData,
     );
     return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
   }
@@ -117,6 +155,21 @@ class AuthRepo {
       }),
     );
     return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
+
+  Future<Map<String, dynamic>> checkEmailOrPhoneValidation({required ValidationType type,required String value}) async {
+
+    Map<String, dynamic>body = {
+      "type":type.name,
+      type.name: value,
+    };
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.validatePhoneNumberOrEmail,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+      body: ApiClient.FormData.fromMap(body),
+    );
+    return await apiObject.requestAPI(isShowLoading: false,isCheckAuthorization: false);
   }
 
   Future<Map<String, dynamic>> forgetPassword( {required String phoneNo,required String countryCode}) async {
@@ -149,84 +202,111 @@ class AuthRepo {
 
   Future<Map<String, dynamic>> logout() async {
     API_STRUCTURE apiObject = API_STRUCTURE(
-      apiUrl: AppConstants.LOGOUT,
+      apiUrl: AppConstants.logout,
       apiRequestMethod: API_REQUEST_METHOD.POST,
-      isWantSuccessMessage: true,
-      body: ApiClient.FormData.fromMap({
-        "token_value": Get.find<AuthController>().getFcmToken(),
-      }),
+      isWantSuccessMessage: false,
+      // body: ApiClient.FormData.fromMap({
+      //   "token_value": Get.find<AuthController>().getFcmToken(),
+      // }),
     );
     return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
   }
 
+  Future<Map<String, dynamic>> deleteAccountOtpSend(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+        apiUrl: AppConstants.sendDeleteAccountOtp,
+        apiRequestMethod: API_REQUEST_METHOD.POST,
+        isWantSuccessMessage: false,
+        body: formData
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: true);
+  }
 
-  // Future<Response> updateFcmToken() async {
-  //   String _deviceToken;
-  //   if (GetPlatform.isIOS && !GetPlatform.isWeb) {
-  //     FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(alert: true, badge: true, sound: true);
-  //     NotificationSettings settings = await FirebaseMessaging.instance.requestPermission(
-  //       alert: true, announcement: false, badge: true, carPlay: false,
-  //       criticalAlert: false, provisional: false, sound: true,
-  //     );
-  //     if(settings.authorizationStatus == AuthorizationStatus.authorized) {
-  //       _deviceToken = await _saveDeviceToken();
-  //     }
-  //   }else {
-  //     _deviceToken = await _saveDeviceToken();
-  //   }
-  //   if(!GetPlatform.isWeb) {
-  //     FirebaseMessaging.instance.subscribeToTopic(AppConstants.TOPIC);
-  //   }
-  //   return await apiClient.postData(AppConstants.TOKEN_URI, {"_method": "put", "cm_firebase_token": _deviceToken});
-  // }
-  //
-  // Future<String> _saveDeviceFcmToken() async {
-  //   String _deviceToken = '@';
-  //   if(!GetPlatform.isWeb) {
-  //     try {
-  //       _deviceToken = await FirebaseMessaging.instance.getToken();
-  //     }catch(e) {}
-  //   }
-  //   if (_deviceToken != null) {
-  //     print('--------Device Token---------- '+_deviceToken);
-  //   }
-  //   return _deviceToken;
-  // }
+  Future<Map<String, dynamic>> deleteAccount(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.deleteAccount,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+      body: formData
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: true);
+  }
 
-  // Future<Response> forgetPassword(String phone) async {
-  //   return await apiClient.postData(AppConstants.FORGET_PASSWORD_URI, {"phone": phone});
-  // }
+  Future<Map<String, dynamic>> sendFreelancerRegisterOtp(ApiClient.FormData formData) async {
+    print("hello: ${AppConstants.sendFreelancerOtp}");
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.sendFreelancerOtp,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
-  // Future<Response> verifyToken(String phone, String token) async {
-  //   return await apiClient.postData(AppConstants.VERIFY_TOKEN_URI, {"phone": phone, "reset_token": token});
-  // }
+  Future<Map<String, dynamic>> sendForgotPasswordOtp(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.sendForgotPasswordOtp,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
-  // Future<Response> resetPassword(String resetToken, String number, String password, String confirmPassword) async {
-  //   return await apiClient.postData(
-  //     AppConstants.RESET_PASSWORD_URI,
-  //     {"_method": "put", "reset_token": resetToken, "phone": number, "password": password, "confirm_password": confirmPassword},
-  //   );
-  // }
+  Future<Map<String, dynamic>> resetForgetPassword(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.resetPassword,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
-  // Future<Response> checkEmail(String email) async {
-  //   return await apiClient.postData(AppConstants.CHECK_EMAIL_URI, {"email": email});
-  // }
+  Future<Map<String, dynamic>> sendHirerRegisterOtp(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.registerHirerOtp,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
-  // Future<Response> verifyEmail(String email, String token) async {
-  //   return await apiClient.postData(AppConstants.VERIFY_EMAIL_URI, {"email": email, "token": token});
-  // }
+  Future<Map<String, dynamic>> updateFreeLancerProfile(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.updateFreelancer,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
-  // Future<bool> saveUserToken(String token) async {
-  //   apiClient.token = token;
-  //   apiClient.updateHeader(
-  //     token, null, sharedPreferences.getString(AppConstants.LANGUAGE_CODE),
-  //     Get.find<SplashController>().module != null ? Get.find<SplashController>().module.id : null,
-  //   );
-  //   return await sharedPreferences.setString(AppConstants.TOKEN, token);
-  // }
+  Future<Map<String, dynamic>> updateHirerProfile(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.updateHirer,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
+  Future<Map<String, dynamic>> updateFreelancerProfileImage(ApiClient.FormData formData) async {
+    API_STRUCTURE apiObject = API_STRUCTURE(
+      apiUrl: AppConstants.updateFreelancerProfileImage,
+      body: formData,
+      apiRequestMethod: API_REQUEST_METHOD.POST,
+      isWantSuccessMessage: false,
+    );
+    return await apiObject.requestAPI(isShowLoading: true,isCheckAuthorization: false);
+  }
 
   bool isLoggedIn() {
     return getLoginUserData()!=null;
+  }
+  bool isLoggedOut() {
+    return getLoginUserData()==null;
   }
 
   bool clearSharedData() {

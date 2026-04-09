@@ -1,4 +1,4 @@
-// import 'package:glow_solar/controller/splash_controller.dart';
+// import 'package:jobreels/controller/splash_controller.dart';
 // import 'package:get/get.dart';
 // import 'package:intl/intl.dart';
 //

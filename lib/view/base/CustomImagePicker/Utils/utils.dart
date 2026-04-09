@@ -3,22 +3,25 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_image/flutter_native_image.dart';
-import 'package:glow_solar/helper/route_helper.dart';
-import 'package:glow_solar/view/base/custom_snackbar.dart';
-import 'package:glow_solar/view/base/loading_widget.dart';
+import 'package:jobreels/view/base/custom_snackbar.dart';
+import 'package:jobreels/view/base/loading_widget.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:get/get.dart';
 
+import '../camera.dart';
 
 Future<XFile?> pickGalleryImage({required BuildContext context})async{
   XFile ?pickedImage;
   try{
     if(!(context.isBlank??true))
     {
-      bool isPermissionsGranted = await Permission.photos.isGranted||await Permission.photos.isLimited;
-      if(isPermissionsGranted){
+      // await Permission.photos.request();
+      // await Permission.photosAddOnly.request();
+      // await Permission.storage.request();
+      // bool isPermissionsGranted = await Permission.photos.isGranted||await Permission.photos.isLimited;
+      // if(isPermissionsGranted){
         await ImagePicker().pickImage(source: ImageSource.gallery,imageQuality: 100,).then((value) async {
           if(value!=null){
             ApiLoader.show();
@@ -26,10 +29,11 @@ Future<XFile?> pickGalleryImage({required BuildContext context})async{
             ApiLoader.hide();
           }
         });
-      }else{
-        isPermissionsGranted = await requestPermission(requiredPermissions: [Permission.photos,], context: context);
-        pickedImage = await pickGalleryImage(context: context);
-      }
+      // }
+      // else{
+      //   isPermissionsGranted = await requestPermission(requiredPermissions: [Permission.photos,], context: context);
+      //   pickedImage = await pickGalleryImage(context: context);
+      // }
     }
   }catch(e){
     debugPrint("Exception in pickGalleryImage:-> $e");
@@ -43,6 +47,7 @@ Future<XFile?> pickCameraImage({required CameraController ?cameraController, req
     if(cameraController?.value.isInitialized??false){
       if (!(cameraController!.value.isTakingPicture)) {
         try {
+          ApiLoader.show();
           await cameraController.takePicture().then((XFile file) {
             capturedImage = file;
           });
@@ -53,15 +58,11 @@ Future<XFile?> pickCameraImage({required CameraController ?cameraController, req
     }else{
       showCustomSnackBar('Camera is not initialized');
     }
-  }else{
-    isPermissionsGranted = await requestPermission(requiredPermissions: [Permission.camera], context: context);
-    capturedImage = await pickCameraImage(cameraController: cameraController,context: context);
   }
   if(capturedImage!=null){
-    ApiLoader.show();
     capturedImage = await fetchImageFromPath(image: capturedImage!);
-    ApiLoader.hide();
   }
+  ApiLoader.hide();
   return capturedImage;
 }
 
@@ -106,9 +107,9 @@ Future<XFile?> cropImage({required String imageToBeCroppedPath}) async {
   return croppedImageFile;
 }
 
-Future<File?>getImage()async{
+Future<File?>getImage(bool pickImageFromGalleryAlso)async{
   File ?pickedImageFile;
-  dynamic result = await Get.toNamed(RouteHelper.getCustomImagePickerRoute())??{"pickedImage":null};
+  dynamic result = await Get.to(()=> CustomImagePickerScreen(showImagePicker: pickImageFromGalleryAlso))??{"pickedImage":null};
   if(result['pickedImage']!=null){
     pickedImageFile = result['pickedImage'];
   }else{
