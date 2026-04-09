@@ -1,0 +1,98 @@
+{
+  "project_info": {
+    "project_number": "578843868744",
+    "project_id": "jobreels-a824f",
+    "storage_bucket": "jobreels-a824f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578843868744:android:3539f2bf09246e1789a27d",
+        "android_client_info": {
+          "package_name": "com.app.jobreels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "578843868744-8arccupcls20utg8a56mrrrmi7rgphoi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.jobreels",
+            "certificate_hash": "aff6e7bddaa25f83391a230766ffc1b081bed3a9"
+          }
+        },
+        {
+          "client_id": "578843868744-oducb1ml2bis3tivrr7mtlpv7lmubpmb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs9MZNSMFgbVV9aW3w-1g4xdiY0OD3tXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "578843868744-oducb1ml2bis3tivrr7mtlpv7lmubpmb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "578843868744-3cu0mp1e1tj6gks5fk3u3dclfqvka9ca.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.job.jobreels"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578843868744:android:20bf23906d04ca1c89a27d",
+        "android_client_info": {
+          "package_name": "com.job.jobreels"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "578843868744-reo2o13ika6msfk12f8s1dd00mr7e60m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.job.jobreels",
+            "certificate_hash": "aff6e7bddaa25f83391a230766ffc1b081bed3a9"
+          }
+        },
+        {
+          "client_id": "578843868744-oducb1ml2bis3tivrr7mtlpv7lmubpmb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs9MZNSMFgbVV9aW3w-1g4xdiY0OD3tXY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "578843868744-oducb1ml2bis3tivrr7mtlpv7lmubpmb.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "578843868744-3cu0mp1e1tj6gks5fk3u3dclfqvka9ca.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.job.jobreels"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

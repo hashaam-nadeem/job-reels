@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:glow_solar/util/color_constants.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../utils/color_constants.dart';
 
 class ApiLoader{
   static bool isShowingLoader = false;

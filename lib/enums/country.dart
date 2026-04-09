@@ -1,0 +1,4 @@
+enum ChargerPricingUnit{
+  Minute,
+  Kwh,
+}

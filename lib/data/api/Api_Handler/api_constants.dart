@@ -24,7 +24,6 @@ class API_REQUEST_METHOD{
   static const String GET = "Get";
   static const String PUT = "Put";
   static const String DELETE="Delete";
-  static const String DOWNLOAD="Download";
   // static const String REQUEST = "Request";
 }
 

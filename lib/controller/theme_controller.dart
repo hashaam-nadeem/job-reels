@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:glow_solar/theme/dark_theme.dart';
+import 'package:glow_solar/theme/light_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workerapp/utils/app_constants.dart';
-
-
+import '../util/app_constants.dart';
 
 class ThemeController extends GetxController implements GetxService {
   final SharedPreferences sharedPreferences;
@@ -11,28 +11,29 @@ class ThemeController extends GetxController implements GetxService {
     _loadCurrentTheme();
   }
 
-  bool _darkTheme = false;
-  Color ?_lightColor;
-  Color ?_darkColor;
+  int _appTheme = 1;
+  int get darkTheme => _appTheme;
+  bool get isDarkMode => _appTheme==0;
+  ThemeData get getTheme => _appTheme==0? dark(): light();
 
-  bool get darkTheme => _darkTheme;
-  Color ?get darkColor => _darkColor;
-  Color ?get lightColor => _lightColor;
-
-  void toggleTheme() {
-    _darkTheme = !_darkTheme;
-    sharedPreferences.setBool(AppConstant.THEME, _darkTheme);
+  void toggleTheme(){
+    _appTheme = _appTheme==1?0:1;
+    sharedPreferences.setInt(AppConstants.THEME, _appTheme);
     update();
   }
 
-  void changeTheme(Color lightColor, Color darkColor) {
-    _lightColor = lightColor;
-    _darkColor = darkColor;
+  void updateLightTheme({int isLightTheme= 1}) {
+    if(isLightTheme!=_appTheme){
+      _appTheme = isLightTheme;
+      sharedPreferences.setInt(AppConstants.THEME, _appTheme);
+    }
     update();
   }
 
   void _loadCurrentTheme() async {
-    _darkTheme = sharedPreferences.getBool(AppConstant.THEME) ?? false;
+    _appTheme = (sharedPreferences.getInt(AppConstants.THEME) ?? 1);
+    debugPrint("_appTheme:-> $_appTheme");
     update();
   }
+
 }

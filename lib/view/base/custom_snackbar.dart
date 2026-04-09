@@ -1,10 +1,8 @@
-
+import 'package:glow_solar/helper/responsive_helper.dart';
+import 'package:glow_solar/util/dimensions.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../helper/responsive_helper.dart';
-import '../../utils/dimensions.dart';
-import '../../utils/styles.dart';
+import 'package:glow_solar/util/styles.dart';
 
 void showCustomSnackBar(String message, {bool isError = true}) {
   if(message.isNotEmpty) {

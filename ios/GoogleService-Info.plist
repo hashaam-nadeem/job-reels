@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>578843868744-0n3si90srkq7368vluntv35sn0sibcap.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.578843868744-0n3si90srkq7368vluntv35sn0sibcap</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>578843868744-8arccupcls20utg8a56mrrrmi7rgphoi.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCDTC8KvW_RErCvzNjUrZO_UtXgAAfdMDU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>578843868744</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.job.jobreels</string>
+	<key>PROJECT_ID</key>
+	<string>jobreels-a824f</string>
+	<key>STORAGE_BUCKET</key>
+	<string>jobreels-a824f.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:578843868744:ios:43d18c0fcc1a65c689a27d</string>
+</dict>
+</plist>
